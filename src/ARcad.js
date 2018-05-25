@@ -23,7 +23,10 @@ class ARcad {
   }
 
   listen() {
-    document.addEventListener("wheel", (e) => {
+    this.element.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
       let container = this.element.querySelector("#container");
       let transform = container.style.transform;
       let scale = parseFloat(transform.split("scale(")[1].split(")")[0]);
@@ -35,11 +38,15 @@ class ARcad {
     });
 
     document.addEventListener("keyup", (e) => {
+      if (document.activeElement != this.element) return;
+
       // TODO: Disable when container out of focus
       this.svgControls.moveLocal(e);
     });
 
     setTimeout(()=>{
+      this.element.setAttribute("tabindex", 0);
+      this.element.focus();
       this.initTransform();
       this.element.addEventListener("mousedown", this.mousedown.bind(this));
       this.element.addEventListener("mouseup", this.mouseup.bind(this));
