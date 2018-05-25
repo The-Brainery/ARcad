@@ -1513,6 +1513,10 @@ isobject@^3.0.0, isobject@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
 
+jbone@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/jbone/-/jbone-1.2.1.tgz#7b14b2b18f7d3f3ef3f01c9ec9de71e0c98324fc"
+
 js-base64@^2.1.9:
   version "2.4.5"
   resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.4.5.tgz#e293cd3c7c82f070d700fc7a1ca0a2e69f101f92"

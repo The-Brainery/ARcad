@@ -21,7 +21,6 @@ class ARcad {
     this.element.appendChild(this.gui.domElement);
     this.listen();
   }
-
   listen() {
     this.element.addEventListener("wheel", (e) => {
       e.preventDefault();
@@ -258,10 +257,10 @@ const CreateGUI = (arcad, svgUrl) => {
       arcad.svgControls.removeAll();
     },
     get transitionDurationMS() {
-      return parseInt(localStorage.getItem("transition-duration-ms")) || 1000;
+      return parseInt(localStorage.getItem("transition")) || 1000;
     },
     set transitionDurationMS(_tms) {
-      localStorage.setItem("transition-duration-ms", _tms);
+      localStorage.setItem("transition", _tms);
     },
     get hideAnchors() {
       return this._hideAnchors || false;

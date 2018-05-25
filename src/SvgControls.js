@@ -2,7 +2,7 @@ const yo = require('yo-yo');
 const _ = require('lodash');
 const svgIntersections = require('svg-intersections');
 const basicContext = require('basiccontext');
-
+const jbone = require('jbone');
 const SVG = require('svg.js');
 
 // Make some of these constants accessible through mqtt
@@ -22,6 +22,7 @@ const SELECTED_LINE_OPTIONS = {width: 1, color: 'red'};
 
 class SvgControls {
   constructor(element, svgUrl) {
+    _.extend(this, jbone);
     this.element = element;
     this.paths = [];
     this.init(element, svgUrl);
@@ -171,6 +172,11 @@ class SvgControls {
           this._active = _active;
           if (_active == true) this.style.fill = GREEN;
           if (_active != true) this.style.fill = BLUE;
+          _this.trigger("fluxels-updated", {
+            active: _.filter(_this.paths, "active"),
+            selected: _.filter(_this.paths, "selected"),
+            all: _this.paths
+          });
         }
       });
 
@@ -233,7 +239,13 @@ class SvgControls {
         line.channels = activeRoute.channels;
         line.node.setAttribute("class", "route");
         line.node.execute = async () => {
-          let time = parseInt(localStorage.getItem("transition-duration-ms")) || 1000;
+          let time = parseInt(localStorage.getItem("transition")) || 1000;
+          this.trigger("route-executed", {
+            routeExecuted: line.node,
+            routes: document.querySelectorAll(".route"),
+            transition: time
+          });
+          line.node.remove();
           for (let [i, channel] of line.channels.entries()) {
             let paths = svg.querySelectorAll(`[data-channels="${channel}"]`);
             _.each(paths, (p) => p.active = true);
@@ -241,6 +253,14 @@ class SvgControls {
             _.each(paths, (p) => p.active = false);
           }
         };
+
+        line.node.clear = () => {
+          this.trigger("route-removed", {
+            removedRoute: _.clone(line.node),
+            routes: document.querySelectorAll(".route")
+          });
+          line.node.remove();
+        }
 
         line.node.addEventListener("contextmenu", (e) => {
           line.stroke(SELECTED_LINE_OPTIONS);
@@ -255,11 +275,17 @@ class SvgControls {
 
           let clicked = _.noop;
           let items = [
-            {title: 'Remove Route', fn: ()=>line.node.remove()},
+            {title: 'Remove Route', fn: ()=>line.node.clear()},
             {title: 'Execute Route', fn: async () => await line.node.execute()}
           ];
           basicContext.show(items, e);
         });
+
+        this.trigger("route-added", {
+          new: line.node,
+          all: document.querySelectorAll(".route")
+        });
+
       });
 
 
