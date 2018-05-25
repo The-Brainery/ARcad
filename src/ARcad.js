@@ -17,7 +17,7 @@ class ARcad {
     this.prevAnchors = [];
     this.scale = 1;
     this.svgControls = CreateScene(this, svgUrl);
-    this.gui = CreateGUI(this);
+    this.gui = CreateGUI(this, svgUrl);
     this.element.appendChild(this.gui.domElement);
     this.listen();
   }
