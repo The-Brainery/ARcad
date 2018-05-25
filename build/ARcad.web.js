@@ -38678,43 +38678,59 @@ class SvgControls {
       const d = path.getAttribute("d");
       path.svgIntersections = svgIntersections.shape("path", {d});
 
-      if (path.active == undefined)
-        Object.defineProperty(path, 'active', {
-          get: function() {return this._active == true},
-          set: function(_active) {
-            this._active = _active;
-            if (_active == true) this.style.fill = GREEN;
-            if (_active != true) this.style.fill = BLUE;
-            _this.trigger("fluxels-updated", {
-              active: _.filter(_this.paths, "active"),
-              selected: _.filter(_this.paths, "selected"),
-              all: _this.paths
-            });
-          }
-        });
+      let active, selected;
 
-      if (path.selected == undefined)
-        Object.defineProperty(path, 'selected', {
-          get: function() {return this._selected == true},
-          set: function(_selected) {
-            // Unselect all other paths:
-            _.each(_this.paths, (p) => {
-              p._selected = false;
-              p.style.stroke = "";
-            });
+      if (path.active != undefined) {
+        active = path.active;
+        delete path.active;
+      }
 
-            this._selected = _selected;
-            if (_selected == true) this.style.stroke = RED;
-          }
-        });
+      Object.defineProperty(path, 'active', {
+        configurable: true,
+        get: function() {return this._active == true},
+        set: function(_active) {
+          this._active = _active;
+          console.log({_active});
+          if (_active == true) this.style.fill = GREEN;
+          if (_active != true) this.style.fill = BLUE;
+          _this.trigger("fluxels-updated", {
+            active: _.filter(_this.paths, "active"),
+            selected: _.filter(_this.paths, "selected"),
+            all: _this.paths
+          });
+        }
+      });
 
-      path.addEventListener("click", (e) => {
+      if (active != undefined) path.active = active;
+
+      if (path.selected != undefined) {
+        selected = path.selected;
+        delete path.selected;
+      }
+      Object.defineProperty(path, 'selected', {
+        configurable: true,
+        get: function() {return this._selected == true},
+        set: function(_selected) {
+          // Unselect all other paths:
+          _.each(_this.paths, (p) => {
+            p._selected = false;
+            p.style.stroke = "";
+          });
+
+          this._selected = _selected;
+          if (_selected == true) this.style.stroke = RED;
+        }
+      });
+
+      if (selected != undefined) path.selected = selected;
+
+      path.onclick = (e) => {
         let active = path.active;
         path.active = !path.active;
         if (_this.shiftDown == true) path.selected = true;
-      });
+      };
 
-      path.addEventListener("mousedown", (e) => {
+      path.onmousedown = (e) => {
         drawingRoute = true;
         let ids = [path.id];
         let line = draw.polyline().fill('none').stroke(ACTIVE_LINE_OPTIONS);
@@ -38728,9 +38744,9 @@ class SvgControls {
         let y = bbox.y + bbox.height/2;
 
         line.plot([[x, y]]);
-      });
+      };
 
-      path.addEventListener("mouseover", (e) => {
+      path.onmouseover = (e) => {
         if (drawingRoute != true) return;
         activeRoute.ids.push(path.id);
         activeRoute.channels.push(path.dataset.channels);
@@ -38742,65 +38758,63 @@ class SvgControls {
         let y = bbox.y + bbox.height/2;
 
         line.plot([...prev.value, [x, y]]);
-      });
+      };
+    });
 
-      document.addEventListener("mouseup", (e) => {
-        if (drawingRoute != true) return;
-        drawingRoute = false;
-        const line = activeRoute.line;
-        line.stroke(INACTIVE_LINE_OPTIONS);
-        line.ids = activeRoute.ids;
-        line.channels = activeRoute.channels;
-        line.node.setAttribute("class", "route");
-        line.node.execute = async () => {
-          let time = parseInt(localStorage.getItem("transition")) || 1000;
-          this.trigger("route-executed", {
-            routeExecuted: line.node,
-            routes: document.querySelectorAll(".route"),
-            transition: time
-          });
-          for (let [i, channel] of line.channels.entries()) {
-            let paths = svg.querySelectorAll(`[data-channels="${channel}"]`);
-            _.each(paths, (p) => p.active = true);
-            await new Promise((res,rej)=>setTimeout(res, time));
-            _.each(paths, (p) => p.active = false);
-          }
-        };
-
-        line.node.clear = () => {
-          this.trigger("route-removed", {
-            removedRoute: _.clone(line.node),
-            routes: document.querySelectorAll(".route")
-          });
-          line.node.remove();
+    document.addEventListener("mouseup", (e) => {
+      if (drawingRoute != true) return;
+      drawingRoute = false;
+      const line = activeRoute.line;
+      line.stroke(INACTIVE_LINE_OPTIONS);
+      line.ids = activeRoute.ids;
+      line.channels = activeRoute.channels;
+      line.node.setAttribute("class", "route");
+      line.node.execute = async () => {
+        let time = parseInt(localStorage.getItem("transition")) || 1000;
+        this.trigger("route-executed", {
+          routeExecuted: line.node,
+          routes: document.querySelectorAll(".route"),
+          transition: time
+        });
+        for (let [i, channel] of line.channels.entries()) {
+          let paths = svg.querySelectorAll(`[data-channels="${channel}"]`);
+          _.each(paths, (p) => p.active = true);
+          await new Promise((res,rej)=>setTimeout(res, time));
+          _.each(paths, (p) => p.active = false);
         }
+      };
 
-        line.node.addEventListener("contextmenu", (e) => {
-          line.stroke(SELECTED_LINE_OPTIONS);
-
-          // Unselect on "click" action
-          let unselectFcn;
-          unselectFcn = (e) => {
-            line.stroke(INACTIVE_LINE_OPTIONS);
-            document.removeEventListener("click", unselectFcn);
-          }
-          document.addEventListener("click", unselectFcn);
-
-          let clicked = _.noop;
-          let items = [
-            {title: 'Remove Route', fn: ()=>line.node.clear()},
-            {title: 'Execute Route', fn: async () => await line.node.execute()}
-          ];
-          basicContext.show(items, e);
+      line.node.clear = () => {
+        this.trigger("route-removed", {
+          removedRoute: _.clone(line.node),
+          routes: document.querySelectorAll(".route")
         });
+        line.node.remove();
+      }
 
-        this.trigger("route-added", {
-          new: line.node,
-          all: document.querySelectorAll(".route")
-        });
+      line.node.addEventListener("contextmenu", (e) => {
+        line.stroke(SELECTED_LINE_OPTIONS);
 
+        // Unselect on "click" action
+        let unselectFcn;
+        unselectFcn = (e) => {
+          line.stroke(INACTIVE_LINE_OPTIONS);
+          document.removeEventListener("click", unselectFcn);
+        }
+        document.addEventListener("click", unselectFcn);
+
+        let clicked = _.noop;
+        let items = [
+          {title: 'Remove Route', fn: ()=>line.node.clear()},
+          {title: 'Execute Route', fn: async () => await line.node.execute()}
+        ];
+        basicContext.show(items, e);
       });
 
+      this.trigger("route-added", {
+        new: line.node,
+        all: document.querySelectorAll(".route")
+      });
 
     });
 

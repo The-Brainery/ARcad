@@ -21,12 +21,12 @@ SVG Object + camera overlay (and vice versa) with Perpective Transform and DOM e
 
 ## Running Examples
 
-1. Clone this repository
+### Basic example
+Open ```examples/basic/index.html``` in your web browser
 
-2. run ```npm install``` or ```yarn install``` from root directory
+## Development
 
-3. run ```npm run build``` or ```yarn build``` from root directory
+1. run ```npm install``` or ```yarn install``` from root directory
 
-4. run ```npm run start``` or ```yarn start``` from root directory
-
-5. Navigate to http://localhost:3200/basic in your webbrowser. *You must open the html page from "http://localhost:3200/basic" to ensure the SVG file will load.*
+2. If you want to use the bundled version, run the following:
+  ```npm run build``` or ```yarn build``` from root directory
