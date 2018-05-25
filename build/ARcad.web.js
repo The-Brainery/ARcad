@@ -21895,24 +21895,24 @@ const CreateGUI = (arcad, svgDOM) => {
   };
 
   gui = new dat.GUI({autoPlace: false});
-  var sceneFolder = gui.addFolder('Scene');
-  var routeFolder = gui.addFolder('Routes');
-  var videoFolder = gui.addFolder('Video');
-  var svgFolder = gui.addFolder('SVG');
-
-  sceneFolder.add(menu, 'flipForeground');
-  sceneFolder.add(menu, 'hideAnchors');
-  routeFolder.add(menu, 'removeAll');
-  routeFolder.add(menu, 'executeAll');
-  routeFolder.add(menu, 'transition', 0, 3000);
-  videoFolder.add(menu, 'rotateVideo');
-  videoFolder.add(menu, 'flipVideoX');
-  videoFolder.add(menu, 'flipVideoY');
-  svgFolder.add(menu, 'svgOpacity', 0, 100);
+  gui.sceneFolder = gui.addFolder('Scene');
+  gui.routeFolder = gui.addFolder('Routes');
+  gui.videoFolder = gui.addFolder('Video');
+  gui.svgFolder = gui.addFolder('SVG');
+  gui.customFolder = gui.addFolder('Custom');
+  gui.sceneFolder.add(menu, 'flipForeground');
+  gui.sceneFolder.add(menu, 'hideAnchors');
+  gui.routeFolder.add(menu, 'removeAll');
+  gui.routeFolder.add(menu, 'executeAll');
+  gui.routeFolder.add(menu, 'transition', 0, 3000);
+  gui.videoFolder.add(menu, 'rotateVideo');
+  gui.videoFolder.add(menu, 'flipVideoX');
+  gui.videoFolder.add(menu, 'flipVideoY');
+  gui.svgFolder.add(menu, 'svgOpacity', 0, 100);
   gui.domElement.style.position = "absolute";
   gui.domElement.style.top = "0px";
   gui.domElement.style.display = "inline-table";
-
+  gui.menu = menu;
   return gui;
 }
 
