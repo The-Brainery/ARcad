@@ -6,7 +6,15 @@
     <div id="myContent" style="position:absolute;top:0px;left:0px"></div>
     <script>
       let container = document.querySelector("#myContent");
-      let arcad = new ARcad(container, "/default.svg");
+
+      let xhr = new XMLHttpRequest();
+      xhr.open("GET","/default.svg",false);
+      xhr.overrideMimeType("image/svg+xml");
+      xhr.send("");
+      let svg = xhr.responseXML.documentElement;
+
+
+      let arcad = new ARcad(container, svg);
 
       console.log("Listening for:", "fluxels-updated")
       arcad.on("fluxels-updated", (e) => {

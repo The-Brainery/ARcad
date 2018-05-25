@@ -21,11 +21,11 @@ const INACTIVE_LINE_OPTIONS = {width: 1, color: 'green'};
 const SELECTED_LINE_OPTIONS = {width: 1, color: 'red'};
 
 class SvgControls {
-  constructor(element, svgUrl) {
+  constructor(element, svgDOM) {
     _.extend(this, backbone.Events);
     this.element = element;
     this.paths = [];
-    this.init(element, svgUrl);
+    this.init(element, svgDOM);
   }
 
   executeAll() {
@@ -141,9 +141,10 @@ class SvgControls {
     return documentElement;
   }
 
-  init(element, svgUrl) {
+  init(element, svgDOM) {
 
-    let svg = this.loadSvg(svgUrl);
+    let svg = svgDOM;
+    //this.loadSvg(svgUrl);
 
     this.addListeners();
 
@@ -166,33 +167,35 @@ class SvgControls {
       const d = path.getAttribute("d");
       path.svgIntersections = svgIntersections.shape("path", {d});
 
-      Object.defineProperty(path, 'active', {
-        get: function() {return this._active == true},
-        set: function(_active) {
-          this._active = _active;
-          if (_active == true) this.style.fill = GREEN;
-          if (_active != true) this.style.fill = BLUE;
-          _this.trigger("fluxels-updated", {
-            active: _.filter(_this.paths, "active"),
-            selected: _.filter(_this.paths, "selected"),
-            all: _this.paths
-          });
-        }
-      });
+      if (path.active == undefined)
+        Object.defineProperty(path, 'active', {
+          get: function() {return this._active == true},
+          set: function(_active) {
+            this._active = _active;
+            if (_active == true) this.style.fill = GREEN;
+            if (_active != true) this.style.fill = BLUE;
+            _this.trigger("fluxels-updated", {
+              active: _.filter(_this.paths, "active"),
+              selected: _.filter(_this.paths, "selected"),
+              all: _this.paths
+            });
+          }
+        });
 
-      Object.defineProperty(path, 'selected', {
-        get: function() {return this._selected == true},
-        set: function(_selected) {
-          // Unselect all other paths:
-          _.each(_this.paths, (p) => {
-            p._selected = false;
-            p.style.stroke = "";
-          });
+      if (path.selected == undefined)
+        Object.defineProperty(path, 'selected', {
+          get: function() {return this._selected == true},
+          set: function(_selected) {
+            // Unselect all other paths:
+            _.each(_this.paths, (p) => {
+              p._selected = false;
+              p.style.stroke = "";
+            });
 
-          this._selected = _selected;
-          if (_selected == true) this.style.stroke = RED;
-        }
-      });
+            this._selected = _selected;
+            if (_selected == true) this.style.stroke = RED;
+          }
+        });
 
       path.addEventListener("click", (e) => {
         let active = path.active;

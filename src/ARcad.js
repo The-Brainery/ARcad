@@ -10,7 +10,7 @@ const backbone = require('backbone');
 const SvgControls = require('./SvgControls.js');
 
 class ARcad {
-  constructor(element, svgUrl) {
+  constructor(element, svgDOM) {
     _.extend(this, backbone.Events);
     this.element = element;
     this.corners = [100, 100, 300, 100, 100, 300, 300, 300];
@@ -18,8 +18,8 @@ class ARcad {
     this.shiftDown = false;
     this.prevAnchors = [];
     this.scale = 1;
-    this.svgControls = CreateScene(this, svgUrl);
-    this.gui = CreateGUI(this, svgUrl);
+    this.svgControls = CreateScene(this, svgDOM);
+    this.gui = CreateGUI(this, svgDOM);
     this.element.appendChild(this.gui.domElement);
     this.listen();
   }
@@ -248,7 +248,7 @@ const getOriginalCoordinates = (x, y, bbox, scale) => {
   return {x: x_tl, y: y_tl};
 }
 
-const CreateGUI = (arcad, svgUrl) => {
+const CreateGUI = (arcad, svgDOM) => {
   let gui;
 
   var menu = {
@@ -280,13 +280,14 @@ const CreateGUI = (arcad, svgUrl) => {
     set flipForeground(_flipForeground) {
       if (_flipForeground == true) {
         localStorage.setItem("placement", "bottom");
-        arcad.svgControls = CreateScene(arcad, svgUrl);
+        console.log({svgDOM});
+        arcad.svgControls = CreateScene(arcad, svgDOM);
         arcad.initTransform();
         arcad.element.appendChild(gui.domElement);
       }
       if (_flipForeground == false) {
         localStorage.setItem("placement", "top");
-        arcad.svgControls = CreateScene(arcad, svgUrl);
+        arcad.svgControls = CreateScene(arcad, svgDOM);
         arcad.initTransform();
         arcad.element.appendChild(gui.domElement);
       }
@@ -351,7 +352,7 @@ const CreateGUI = (arcad, svgUrl) => {
   return gui;
 }
 
-const CreateScene = (arcad, svgUrl) => {
+const CreateScene = (arcad, svgDOM) => {
   let background, foreground, deviceContainer, video;
 
   let placement = localStorage.getItem("placement") || "top";
@@ -405,7 +406,7 @@ const CreateScene = (arcad, svgUrl) => {
     });
   }
 
-  let controls = new SvgControls(deviceContainer, svgUrl);
+  let controls = new SvgControls(deviceContainer, svgDOM);
 
   controls.on("all", (name, e) => {
     arcad.trigger(name, e);

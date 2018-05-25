@@ -21574,7 +21574,7 @@ const backbone = __webpack_require__(8);
 const SvgControls = __webpack_require__(32);
 
 class ARcad {
-  constructor(element, svgUrl) {
+  constructor(element, svgDOM) {
     _.extend(this, backbone.Events);
     this.element = element;
     this.corners = [100, 100, 300, 100, 100, 300, 300, 300];
@@ -21582,8 +21582,8 @@ class ARcad {
     this.shiftDown = false;
     this.prevAnchors = [];
     this.scale = 1;
-    this.svgControls = CreateScene(this, svgUrl);
-    this.gui = CreateGUI(this, svgUrl);
+    this.svgControls = CreateScene(this, svgDOM);
+    this.gui = CreateGUI(this, svgDOM);
     this.element.appendChild(this.gui.domElement);
     this.listen();
   }
@@ -21812,7 +21812,7 @@ const getOriginalCoordinates = (x, y, bbox, scale) => {
   return {x: x_tl, y: y_tl};
 }
 
-const CreateGUI = (arcad, svgUrl) => {
+const CreateGUI = (arcad, svgDOM) => {
   let gui;
 
   var menu = {
@@ -21844,13 +21844,14 @@ const CreateGUI = (arcad, svgUrl) => {
     set flipForeground(_flipForeground) {
       if (_flipForeground == true) {
         localStorage.setItem("placement", "bottom");
-        arcad.svgControls = CreateScene(arcad, svgUrl);
+        console.log({svgDOM});
+        arcad.svgControls = CreateScene(arcad, svgDOM);
         arcad.initTransform();
         arcad.element.appendChild(gui.domElement);
       }
       if (_flipForeground == false) {
         localStorage.setItem("placement", "top");
-        arcad.svgControls = CreateScene(arcad, svgUrl);
+        arcad.svgControls = CreateScene(arcad, svgDOM);
         arcad.initTransform();
         arcad.element.appendChild(gui.domElement);
       }
@@ -21915,7 +21916,7 @@ const CreateGUI = (arcad, svgUrl) => {
   return gui;
 }
 
-const CreateScene = (arcad, svgUrl) => {
+const CreateScene = (arcad, svgDOM) => {
   let background, foreground, deviceContainer, video;
 
   let placement = localStorage.getItem("placement") || "top";
@@ -21969,7 +21970,7 @@ const CreateScene = (arcad, svgUrl) => {
     });
   }
 
-  let controls = new SvgControls(deviceContainer, svgUrl);
+  let controls = new SvgControls(deviceContainer, svgDOM);
 
   controls.on("all", (name, e) => {
     arcad.trigger(name, e);
@@ -38531,11 +38532,11 @@ const INACTIVE_LINE_OPTIONS = {width: 1, color: 'green'};
 const SELECTED_LINE_OPTIONS = {width: 1, color: 'red'};
 
 class SvgControls {
-  constructor(element, svgUrl) {
+  constructor(element, svgDOM) {
     _.extend(this, backbone.Events);
     this.element = element;
     this.paths = [];
-    this.init(element, svgUrl);
+    this.init(element, svgDOM);
   }
 
   executeAll() {
@@ -38651,9 +38652,10 @@ class SvgControls {
     return documentElement;
   }
 
-  init(element, svgUrl) {
+  init(element, svgDOM) {
 
-    let svg = this.loadSvg(svgUrl);
+    let svg = svgDOM;
+    //this.loadSvg(svgUrl);
 
     this.addListeners();
 
@@ -38676,33 +38678,35 @@ class SvgControls {
       const d = path.getAttribute("d");
       path.svgIntersections = svgIntersections.shape("path", {d});
 
-      Object.defineProperty(path, 'active', {
-        get: function() {return this._active == true},
-        set: function(_active) {
-          this._active = _active;
-          if (_active == true) this.style.fill = GREEN;
-          if (_active != true) this.style.fill = BLUE;
-          _this.trigger("fluxels-updated", {
-            active: _.filter(_this.paths, "active"),
-            selected: _.filter(_this.paths, "selected"),
-            all: _this.paths
-          });
-        }
-      });
+      if (path.active == undefined)
+        Object.defineProperty(path, 'active', {
+          get: function() {return this._active == true},
+          set: function(_active) {
+            this._active = _active;
+            if (_active == true) this.style.fill = GREEN;
+            if (_active != true) this.style.fill = BLUE;
+            _this.trigger("fluxels-updated", {
+              active: _.filter(_this.paths, "active"),
+              selected: _.filter(_this.paths, "selected"),
+              all: _this.paths
+            });
+          }
+        });
 
-      Object.defineProperty(path, 'selected', {
-        get: function() {return this._selected == true},
-        set: function(_selected) {
-          // Unselect all other paths:
-          _.each(_this.paths, (p) => {
-            p._selected = false;
-            p.style.stroke = "";
-          });
+      if (path.selected == undefined)
+        Object.defineProperty(path, 'selected', {
+          get: function() {return this._selected == true},
+          set: function(_selected) {
+            // Unselect all other paths:
+            _.each(_this.paths, (p) => {
+              p._selected = false;
+              p.style.stroke = "";
+            });
 
-          this._selected = _selected;
-          if (_selected == true) this.style.stroke = RED;
-        }
-      });
+            this._selected = _selected;
+            if (_selected == true) this.style.stroke = RED;
+          }
+        });
 
       path.addEventListener("click", (e) => {
         let active = path.active;
