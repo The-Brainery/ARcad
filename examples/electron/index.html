@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <title>ARCAD Electron Example</title>
+    <link rel="stylesheet" type="text/css" href="../../node_modules/basiccontext/dist/basicContext.min.css">
+    <link rel="stylesheet" type="text/css" href="../../node_modules/basiccontext/dist/themes/default.min.css">
+  </head>
+  <body>
+    <div id="myContent"></div>
+    <div id="svgContainer"></div>
+    <script>
+      // Must include css-modules-electron first!
+      require('css-modules-electron/register');
+
+      const fs = require('fs');
+      const ARcad = require('../../src/ARcad.js');
+
+      const svgFile = fs.readFileSync('../default.svg').toString();
+
+      let svgContainer = document.querySelector("#svgContainer");
+      svgContainer.innerHTML = svgFile;
+
+      let container = document.querySelector("#myContent");
+      let arcad = new ARcad(container, svgContainer.firstChild);
+
+      console.log("Listening for:", "fluxels-updated")
+      arcad.on("fluxels-updated", (e) => {
+        console.log("Fluxels updated!");
+        console.log(e);
+      });
+
+    </script>
+
+
+  </body>
+</html>
