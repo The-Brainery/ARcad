@@ -5,11 +5,13 @@ const PerspT = require('perspective-transform');
 const dat = require('dat.gui');
 const yo = require('yo-yo');
 const _ = require('lodash');
+const backbone = require('backbone');
 
 const SvgControls = require('./SvgControls.js');
 
 class ARcad {
   constructor(element, svgUrl) {
+    _.extend(this, backbone.Events);
     this.element = element;
     this.corners = [100, 100, 300, 100, 100, 300, 300, 300];
     this.currentcorner = -1;
@@ -256,11 +258,11 @@ const CreateGUI = (arcad, svgUrl) => {
     removeAll() {
       arcad.svgControls.removeAll();
     },
-    get transitionDurationMS() {
+    get transition() {
       return parseInt(localStorage.getItem("transition")) || 1000;
     },
-    set transitionDurationMS(_tms) {
-      localStorage.setItem("transition", _tms);
+    set transition(_time) {
+      localStorage.setItem("transition", _time);
     },
     get hideAnchors() {
       return this._hideAnchors || false;
@@ -337,7 +339,7 @@ const CreateGUI = (arcad, svgUrl) => {
   sceneFolder.add(menu, 'hideAnchors');
   routeFolder.add(menu, 'removeAll');
   routeFolder.add(menu, 'executeAll');
-  routeFolder.add(menu, 'transitionDurationMS', 0, 3000);
+  routeFolder.add(menu, 'transition', 0, 3000);
   videoFolder.add(menu, 'rotateVideo');
   videoFolder.add(menu, 'flipVideoX');
   videoFolder.add(menu, 'flipVideoY');
@@ -402,7 +404,14 @@ const CreateScene = (arcad, svgUrl) => {
         video.play();
     });
   }
-  return new SvgControls(deviceContainer, svgUrl);
+
+  let controls = new SvgControls(deviceContainer, svgUrl);
+
+  controls.on("all", (name, e) => {
+    arcad.trigger(name, e);
+  })
+
+  return controls;
 }
 
 const Styles = {

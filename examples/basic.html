@@ -7,6 +7,14 @@
     <script>
       let container = document.querySelector("#myContent");
       let arcad = new ARcad(container, "default.svg");
+
+      console.log("Available events: ", arcad.events);
+      console.log("Listening for:", "fluxels-updated")
+      arcad.on("fluxels-updated", (e) => {
+        console.log("Fluxels updated!");
+        console.log(e);
+      });
+
     </script>
   </body>
 </html>

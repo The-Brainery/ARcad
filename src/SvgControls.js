@@ -2,7 +2,7 @@ const yo = require('yo-yo');
 const _ = require('lodash');
 const svgIntersections = require('svg-intersections');
 const basicContext = require('basiccontext');
-const jbone = require('jbone');
+const backbone = require('backbone');
 const SVG = require('svg.js');
 
 // Make some of these constants accessible through mqtt
@@ -22,7 +22,7 @@ const SELECTED_LINE_OPTIONS = {width: 1, color: 'red'};
 
 class SvgControls {
   constructor(element, svgUrl) {
-    _.extend(this, jbone);
+    _.extend(this, backbone.Events);
     this.element = element;
     this.paths = [];
     this.init(element, svgUrl);
@@ -245,7 +245,6 @@ class SvgControls {
             routes: document.querySelectorAll(".route"),
             transition: time
           });
-          line.node.remove();
           for (let [i, channel] of line.channels.entries()) {
             let paths = svg.querySelectorAll(`[data-channels="${channel}"]`);
             _.each(paths, (p) => p.active = true);
