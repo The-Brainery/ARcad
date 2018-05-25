@@ -1,6 +1,6 @@
 <html>
   <head>
-    <script src="ARcad.web.js" /></script>
+    <script src="ARcad.web.js"></script>
   </head>
   <body>
     <div id="myContent" style="position:absolute;top:0px;left:0px"></div>
@@ -8,7 +8,6 @@
       let container = document.querySelector("#myContent");
       let arcad = new ARcad(container, "default.svg");
 
-      console.log("Available events: ", arcad.events);
       console.log("Listening for:", "fluxels-updated")
       arcad.on("fluxels-updated", (e) => {
         console.log("Fluxels updated!");
