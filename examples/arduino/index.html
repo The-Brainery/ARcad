@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <title>ArCAD Arduino Example</title>
+    <link rel="stylesheet" type="text/css" href="../../node_modules/basiccontext/dist/basicContext.min.css">
+    <link rel="stylesheet" type="text/css" href="../../node_modules/basiccontext/dist/themes/default.min.css">
+  </head>
+  <body>
+    <div id="myContent"></div>
+    <div id="svgContainer"></div>
+    <script>
+    var hook = require('node-hook');
+    const SerialPort = require('serialport');
+
+    hook.hook('.css', (source, filename) => {
+      // Override css hooks (load these files using <link> tags instead)
+      return undefined;
+    });
+
+    const fs = require('fs');
+    const ARcad = require('../../src/ARcad.js');
+
+    const svgFile = fs.readFileSync('../default.svg').toString();
+
+    let svgContainer = document.querySelector("#svgContainer");
+    svgContainer.innerHTML = svgFile;
+
+    let container = document.querySelector("#myContent");
+    let arcad = new ARcad(container, svgContainer.firstChild);
+
+    SerialPort.list().then((serialDevices) => {
+
+      let menu = arcad.gui.menu;
+
+      Object.defineProperty(menu, 'serialDevice', {
+        configurable: true,
+        get: function() {return this._comName || null},
+        set: function(comName) {
+          this._comName = comName;
+          const base = new SerialPort(comName, 9600);
+
+           base.on('open', () => {
+             arcad.on("fluxels-updated", (e) => {
+               // Write to serial on arduino 
+               base.write("blink\n");
+             });
+           });
+        }
+      });
+
+      let comNames = serialDevices.map((d)=>d.comName);
+      arcad.gui.customFolder.add(menu, 'serialDevice', comNames);
+
+      // XXX: Patch fix for broken select styling:
+      arcad.gui.domElement.querySelectorAll("select").forEach((s) => {
+        s.style.width = "100%";
+      });
+
+    });
+
+
+
+    </script>
+  </body>
+</html>

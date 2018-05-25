@@ -1,0 +1,14 @@
+{
+  "main": "main.js",
+  "devDependencies": {
+    "electron-rebuild": "^1.7.3"
+  },
+  "scripts": {
+    "install": "electron-rebuild"
+  },
+  "dependencies": {
+    "electron-prebuilt": "^1.4.13",
+    "node-hook": "^1.0.0",
+    "serialport": "^6.2.0"
+  }
+}
