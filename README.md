@@ -12,7 +12,7 @@ SVG Object + camera overlay (and vice versa) with Perpective Transform and DOM e
 ```html
 <html>
   <head>
-    <script src="ARcad.web.js"></script>
+    <script src="/ARcad.web.js"></script>
   </head>
   ...
 ```
@@ -29,4 +29,4 @@ SVG Object + camera overlay (and vice versa) with Perpective Transform and DOM e
 
 4. run ```npm run start``` or ```yarn start``` from root directory
 
-5. Navigate to http://localhost:3200/basic.html in your webbrowser. *You must open the html page from "http://localhost:3200/basic.html" to ensure the SVG file will load.*
+5. Navigate to http://localhost:3200/basic in your webbrowser. *You must open the html page from "http://localhost:3200/basic" to ensure the SVG file will load.*
