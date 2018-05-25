@@ -8,8 +8,14 @@
     <div id="myContent"></div>
     <div id="svgContainer"></div>
     <script>
+      var hook = require('node-hook');
+      hook.hook('.css', (source, filename) => {
+        // Override css hooks (load these files using <link> tags instead)
+        return undefined;
+      });
+
       // Must include css-modules-electron first!
-      require('css-modules-electron/register');
+      // require('css-modules-electron/register');
 
       const fs = require('fs');
       const ARcad = require('../../src/ARcad.js');
