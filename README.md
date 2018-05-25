@@ -24,6 +24,12 @@ SVG Object + camera overlay (and vice versa) with Perpective Transform and DOM e
 ### Basic example
 Open ```examples/basic/index.html``` in your web browser
 
+### Electron example
+1. Ensure electron is installed globally and on the path ```npm i --global electron```
+2. Navigate to ```examples/electron```
+3. Run ```npm install``` or ```yarn install```
+4. Start the sample application via ```electron .```
+
 ## Development
 
 1. run ```npm install``` or ```yarn install``` from root directory
