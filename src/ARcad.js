@@ -250,6 +250,12 @@ const CreateGUI = (arcad, svgUrl) => {
     removeAll() {
       arcad.svgControls.removeAll();
     },
+    get transitionDurationMS() {
+      return parseInt(localStorage.getItem("transition-duration-ms")) || 1000;
+    },
+    set transitionDurationMS(_tms) {
+      localStorage.setItem("transition-duration-ms", _tms);
+    },
     get hideAnchors() {
       return this._hideAnchors || false;
     },
@@ -325,6 +331,7 @@ const CreateGUI = (arcad, svgUrl) => {
   sceneFolder.add(menu, 'hideAnchors');
   routeFolder.add(menu, 'removeAll');
   routeFolder.add(menu, 'executeAll');
+  routeFolder.add(menu, 'transitionDurationMS', 0, 3000);
   videoFolder.add(menu, 'rotateVideo');
   videoFolder.add(menu, 'flipVideoX');
   videoFolder.add(menu, 'flipVideoY');

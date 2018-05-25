@@ -232,12 +232,12 @@ class SvgControls {
         line.ids = activeRoute.ids;
         line.channels = activeRoute.channels;
         line.node.setAttribute("class", "route");
-
-        line.node.execute = async (time=1) => {
+        line.node.execute = async () => {
+          let time = parseInt(localStorage.getItem("transition-duration-ms")) || 1000;
           for (let [i, channel] of line.channels.entries()) {
             let paths = svg.querySelectorAll(`[data-channels="${channel}"]`);
             _.each(paths, (p) => p.active = true);
-            await new Promise((res,rej)=>setTimeout(res, time*1000));
+            await new Promise((res,rej)=>setTimeout(res, time));
             _.each(paths, (p) => p.active = false);
           }
         };
