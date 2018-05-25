@@ -30,6 +30,13 @@ Open ```examples/basic/index.html``` in your web browser
 3. Run ```npm install``` or ```yarn install```
 4. Start the sample application via ```electron .```
 
+### Arduino + Electron example
+1. Ensure electron is installed globally and on the path ```npm i --global electron```
+2. Navigate to ```examples/arduino```
+3. Upload ```examples/arduino/serialReader/serialReader.ino``` to your arduino
+3. Run ```npm install``` or ```yarn install``` from ```examples/arduino```
+4. Run ```electron .``` from ```examples/arduino```
+
 ## Development
 
 1. run ```npm install``` or ```yarn install``` from root directory
