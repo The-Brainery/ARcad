@@ -38731,6 +38731,7 @@ class SvgControls {
       };
 
       path.onmousedown = (e) => {
+        if (e.button != 0) return;
         drawingRoute = true;
         let ids = [path.id];
         let line = draw.polyline().fill('none').stroke(ACTIVE_LINE_OPTIONS);
