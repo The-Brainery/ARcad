@@ -328,28 +328,37 @@ const CreateGUI = (arcad, svgDOM) => {
       svg.style.opacity = _svgOpacity / 100.0;
     },
     get neighbourDistance() {
-      let currentVal = _.get(arcad, "svgControls.neighbourDistance") || 10;
+      let defaultVal = JSON.parse(localStorage.getItem("neighbour-distance") || "10");
+      let currentVal = _.get(arcad, "svgControls.neighbourDistance") || defaultVal;
       _.set(arcad, "svgControls.neighbourDistance", currentVal);
+      localStorage.setItem("neighbour-distance", currentVal);
       return currentVal;
     },
     set neighbourDistance(_neighbourDistance) {
       _.set(arcad, "svgControls.neighbourDistance", _neighbourDistance);
+      localStorage.setItem("neighbour-distance", _neighbourDistance);
     },
     get fluxelsInverted() {
-      let currentVal = _.get(arcad, "svgControls.fluxelsInverted") || false;
+      let defaultVal = JSON.parse(localStorage.getItem("fluxels-inverted") || "false");
+      let currentVal = _.get(arcad, "svgControls.fluxelsInverted") || defaultVal;
       _.set(arcad, "svgControls.fluxelsInverted", currentVal);
+      localStorage.setItem("fluxels-inverted", currentVal);
       return currentVal;
     },
     set fluxelsInverted(_fluxelsInverted){
       _.set(arcad, "svgControls.fluxelsInverted", _fluxelsInverted);
+      localStorage.setItem("fluxels-inverted", _fluxelsInverted);
     },
     get invertDuration() {
-      let currentVal = _.get(arcad, "svgControls.invertDuration") || 1000;
+      let defaultVal = JSON.parse(localStorage.getItem("invert-duration") || "1000");
+      let currentVal = _.get(arcad, "svgControls.invertDuration") || defaultVal;
       _.set(arcad, "svgControls.invertDuration", currentVal);
+      localStorage.setItem("invert-duration", currentVal);
       return currentVal;
     },
     set invertDuration(_duration) {
       _.set(arcad, "svgControls.invertDuration", _duration);
+      localStorage.setItem("invert-duration", _duration);
     }
   };
 

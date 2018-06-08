@@ -155,6 +155,7 @@ class SvgControls {
       // Turn on neighbour paths
       _.each(neighbours, (neighbour) => {
         if (neighbour == undefined) return;
+        if (neighbour.distance > this.neighbourDistance) return;
         neighbour.path.active = true;
       });
       path.active = true;
@@ -222,7 +223,7 @@ class SvgControls {
         set: function(_active) {
           this._active = _active;
           if (_active == true) this.style.fill = GREEN;
-          if (_active != true) this.style.fill = BLUE;
+          if (_active != true) this.style.fill = "";
           _this.trigger("fluxels-updated", {
             active: _.filter(_this.paths, "active"),
             selected: _.filter(_this.paths, "selected"),
@@ -248,7 +249,10 @@ class SvgControls {
           });
 
           this._selected = _selected;
-          if (_selected == true) this.style.stroke = RED;
+          if (_selected == true) {
+            this.style.stroke = RED;
+            this.style.strokeWidth = 5;
+          }
         }
       });
 
