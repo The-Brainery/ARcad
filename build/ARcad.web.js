@@ -21844,7 +21844,6 @@ const CreateGUI = (arcad, svgDOM) => {
     set flipForeground(_flipForeground) {
       if (_flipForeground == true) {
         localStorage.setItem("placement", "bottom");
-        console.log({svgDOM});
         arcad.svgControls = CreateScene(arcad, svgDOM);
         arcad.initTransform();
         arcad.element.appendChild(gui.domElement);
@@ -21891,6 +21890,14 @@ const CreateGUI = (arcad, svgDOM) => {
     set svgOpacity(_svgOpacity) {
       let svg = arcad.element.querySelector("svg");
       svg.style.opacity = _svgOpacity / 100.0;
+    },
+    get neighbourDistance() {
+      let currentVal = _.get(arcad, "svgControls.neighbourDistance") || 10;
+      _.set(arcad, "svgControls.neighbourDistance", currentVal);
+      return currentVal;
+    },
+    set neighbourDistance(_neighbourDistance) {
+      _.set(arcad, "svgControls.neighbourDistance", _neighbourDistance);
     }
   };
 
@@ -21909,6 +21916,7 @@ const CreateGUI = (arcad, svgDOM) => {
   gui.videoFolder.add(menu, 'flipVideoX');
   gui.videoFolder.add(menu, 'flipVideoY');
   gui.svgFolder.add(menu, 'svgOpacity', 0, 100);
+  gui.svgFolder.add(menu, 'neighbourDistance', 10);
   gui.domElement.style.position = "absolute";
   gui.domElement.style.top = "0px";
   gui.domElement.style.display = "inline-table";
@@ -38637,6 +38645,7 @@ class SvgControls {
 
     path.active = false;
     let closest = _.sortBy(collisions, "distance")[0];
+    if (closest.distance > this.neighbourDistance) return;
     closest.path.selected = true;
     closest.path.active = true;
   }
@@ -38690,7 +38699,6 @@ class SvgControls {
         get: function() {return this._active == true},
         set: function(_active) {
           this._active = _active;
-          console.log({_active});
           if (_active == true) this.style.fill = GREEN;
           if (_active != true) this.style.fill = BLUE;
           _this.trigger("fluxels-updated", {

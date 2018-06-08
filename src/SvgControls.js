@@ -126,6 +126,7 @@ class SvgControls {
 
     path.active = false;
     let closest = _.sortBy(collisions, "distance")[0];
+    if (closest.distance > this.neighbourDistance) return;
     closest.path.selected = true;
     closest.path.active = true;
   }
@@ -179,7 +180,6 @@ class SvgControls {
         get: function() {return this._active == true},
         set: function(_active) {
           this._active = _active;
-          console.log({_active});
           if (_active == true) this.style.fill = GREEN;
           if (_active != true) this.style.fill = BLUE;
           _this.trigger("fluxels-updated", {
