@@ -21898,6 +21898,22 @@ const CreateGUI = (arcad, svgDOM) => {
     },
     set neighbourDistance(_neighbourDistance) {
       _.set(arcad, "svgControls.neighbourDistance", _neighbourDistance);
+    },
+    get fluxelsInverted() {
+      let currentVal = _.get(arcad, "svgControls.fluxelsInverted") || false;
+      _.set(arcad, "svgControls.fluxelsInverted", currentVal);
+      return currentVal;
+    },
+    set fluxelsInverted(_fluxelsInverted){
+      _.set(arcad, "svgControls.fluxelsInverted", _fluxelsInverted);
+    },
+    get invertDuration() {
+      let currentVal = _.get(arcad, "svgControls.invertDuration") || 1000;
+      _.set(arcad, "svgControls.invertDuration", currentVal);
+      return currentVal;
+    },
+    set invertDuration(_duration) {
+      _.set(arcad, "svgControls.invertDuration", _duration);
     }
   };
 
@@ -21917,6 +21933,9 @@ const CreateGUI = (arcad, svgDOM) => {
   gui.videoFolder.add(menu, 'flipVideoY');
   gui.svgFolder.add(menu, 'svgOpacity', 0, 100);
   gui.svgFolder.add(menu, 'neighbourDistance', 10);
+  gui.svgFolder.add(menu, 'fluxelsInverted', false);
+  gui.svgFolder.add(menu, 'invertDuration', 1000);
+
   gui.domElement.style.position = "absolute";
   gui.domElement.style.top = "0px";
   gui.domElement.style.display = "inline-table";
@@ -38592,62 +38611,103 @@ class SvgControls {
     return collisions;
   }
 
-  moveLocal(e){
-    let keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-    if (!_.includes(keys, e.code)) return;
+  getClosestCollision(path, direction){
     let x1,y1,x2,y2,ray;
-
-    let path = _.find(this.paths, "selected");
     let bbox = path.getBBox();
     let collisions = [];
 
-    if (e.code == "ArrowUp") {
+    if (_.includes(direction, "T")) {
       y1 = bbox.y;
-      y2 = y1 - DISTANCE;
-
-      for (let i = 0 ; i < NUM_SEGS; i++){
-        x1 = x2 = bbox.x + i * bbox.width/NUM_SEGS;
-        ray = Ray(x1,y1,x2,y2);
-        collisions = [...collisions, ...this.castRay(ray, path)];
+      if (_.includes(direction, "R")) {
+        x1 = bbox.x + bbox.width;
+        x2 = x1 + DISTANCE*Math.cos(Math.PI/4);
+        y2 = y1 - DISTANCE*Math.sin(Math.PI/4);
+      } else if (_.includes(direction, "L")) {
+        x1 = bbox.x;
+        x2 = x1 - DISTANCE*Math.cos(Math.PI/4);
+        y2 = y1 - DISTANCE*Math.sin(Math.PI/4);
+      } else {
+        x1 = x2 = bbox.x + bbox.width/2;
+        y2 = y1 - DISTANCE;
       }
     }
 
-    if (e.code == "ArrowDown") {
+    else if (_.includes(direction, "B")) {
       y1 = bbox.y + bbox.height;
-      y2 = y1 + DISTANCE;
-
-      for (let i = 0 ; i < NUM_SEGS; i++){
-        x1 = x2 = bbox.x + i * bbox.width/NUM_SEGS;
-        ray = Ray(x1,y1,x2,y2);
-        collisions = [...collisions, ...this.castRay(ray, path)];
+      if (_.includes(direction, "R")) {
+        x1 = bbox.x + bbox.width;
+        x2 = x1 + DISTANCE*Math.cos(Math.PI/4);
+        y2 = y1 + DISTANCE*Math.sin(Math.PI/4);
+      } else if (_.includes(direction, "L")) {
+        x1 = bbox.x;
+        x2 = x1 - DISTANCE*Math.cos(Math.PI/4);
+        y2 = y1 + DISTANCE*Math.sin(Math.PI/4);
+      } else {
+        x1 = x2 = bbox.x + bbox.width/2;
+        y2 = y1 + DISTANCE;
       }
     }
 
-    if (e.code == "ArrowLeft") {
-      x1 = bbox.x;
-      x2 = x1 - DISTANCE;
-      for (let i = 0 ; i < NUM_SEGS; i++){
-        y1 = y2 = bbox.y + i * bbox.height/NUM_SEGS;
-        ray = Ray(x1,y1,x2,y2);
-        collisions = [...collisions, ...this.castRay(ray, path)];
-      }
-    }
-
-    if (e.code == "ArrowRight") {
+    else if (direction == "R") {
       x1 = bbox.x + bbox.width;
       x2 = x1 + DISTANCE;
-      for (let i = 0 ; i < NUM_SEGS; i++){
-        y1 = y2 = bbox.y + i * bbox.height/NUM_SEGS;
-        ray = Ray(x1,y1,x2,y2);
-        collisions = [...collisions, ...this.castRay(ray, path)];
-      }
+      y1 = y2 = bbox.y + bbox.height/2;
     }
 
-    path.active = false;
+    else if (direction == "L") {
+      x1 = bbox.x;
+      x2 = x1 - DISTANCE;
+      y1 = y2 = bbox.y + bbox.height/2;
+    }
+
+    ray = Ray(x1,y1,x2,y2);
+    collisions = this.castRay(ray, path);
+
     let closest = _.sortBy(collisions, "distance")[0];
+    return closest;
+  }
+
+  moveLocal(e){
+    let keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    if (!_.includes(keys, e.code)) return;
+    let path = _.find(this.paths, "selected");
+    let closest;
+    if (e.code == "ArrowUp") closest = this.getClosestCollision(path, "T");
+    if (e.code == "ArrowDown") closest = this.getClosestCollision(path, "B");
+    if (e.code == "ArrowLeft") closest = this.getClosestCollision(path, "L");
+    if (e.code == "ArrowRight") closest = this.getClosestCollision(path, "R");
+
+    path.active = false;
     if (closest.distance > this.neighbourDistance) return;
-    closest.path.selected = true;
-    closest.path.active = true;
+    if (this.fluxelsInverted != true) {
+      closest.path.selected = true;
+      closest.path.active = true;
+    } else {
+      // If inverted turn on all but the one selected;
+      this.paths.forEach((p)=>p.active = false);
+
+      // Activate neighbours
+      let dirs = ["L", "R", "T", "B", "TL", "TR", "BL", "BR"];
+      let neighbours = _.map(dirs, d=>this.getClosestCollision(path, d));
+
+      // Turn on neighbour paths
+      _.each(neighbours, (neighbour) => {
+        if (neighbour == undefined) return;
+        neighbour.path.active = true;
+      });
+      path.active = true;
+      closest.path.selected = true;
+      closest.path.active = false;
+
+      // Turn off all after given duration
+      setTimeout(() => {
+        let selected = _.find(this.paths, "selected");
+        // if no longer selected, then dont turn off (timeout no longer relevent)
+        if (selected.id != _.get(closest, "path.id")) return;
+        this.paths.forEach((p)=>p.active = false);
+      }, this.invertDuration);
+    }
+
   }
 
   loadSvg(url) {
@@ -38733,9 +38793,16 @@ class SvgControls {
       if (selected != undefined) path.selected = selected;
 
       path.onclick = (e) => {
-        let active = path.active;
-        path.active = !path.active;
-        if (_this.shiftDown == true) path.selected = true;
+        if (this.fluxelsInverted) {
+          // Disable standard click for inverted mode (as doesn't make sense)
+          this.paths.forEach((p)=>p.active = false);
+          if (_this.shiftDown == true) path.selected = true;
+          return;
+        } else {
+          let active = path.active;
+          path.active = !path.active;
+          if (_this.shiftDown == true) path.selected = true;
+        }
       };
 
       path.onmousedown = (e) => {

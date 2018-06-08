@@ -334,6 +334,22 @@ const CreateGUI = (arcad, svgDOM) => {
     },
     set neighbourDistance(_neighbourDistance) {
       _.set(arcad, "svgControls.neighbourDistance", _neighbourDistance);
+    },
+    get fluxelsInverted() {
+      let currentVal = _.get(arcad, "svgControls.fluxelsInverted") || false;
+      _.set(arcad, "svgControls.fluxelsInverted", currentVal);
+      return currentVal;
+    },
+    set fluxelsInverted(_fluxelsInverted){
+      _.set(arcad, "svgControls.fluxelsInverted", _fluxelsInverted);
+    },
+    get invertDuration() {
+      let currentVal = _.get(arcad, "svgControls.invertDuration") || 1000;
+      _.set(arcad, "svgControls.invertDuration", currentVal);
+      return currentVal;
+    },
+    set invertDuration(_duration) {
+      _.set(arcad, "svgControls.invertDuration", _duration);
     }
   };
 
@@ -353,6 +369,9 @@ const CreateGUI = (arcad, svgDOM) => {
   gui.videoFolder.add(menu, 'flipVideoY');
   gui.svgFolder.add(menu, 'svgOpacity', 0, 100);
   gui.svgFolder.add(menu, 'neighbourDistance', 10);
+  gui.svgFolder.add(menu, 'fluxelsInverted', false);
+  gui.svgFolder.add(menu, 'invertDuration', 1000);
+
   gui.domElement.style.position = "absolute";
   gui.domElement.style.top = "0px";
   gui.domElement.style.display = "inline-table";
