@@ -21611,6 +21611,9 @@ class ARcad {
 
     setTimeout(()=>{
       this.element.setAttribute("tabindex", 0);
+      this.element.style.outlineColor = "transparent";
+      this.element.style.outlineStyle = "none";
+
       this.element.focus();
       this.initTransform();
       this.element.addEventListener("mousedown", this.mousedown.bind(this));
