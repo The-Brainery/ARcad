@@ -8,6 +8,7 @@ const _ = require('lodash');
 const backbone = require('backbone');
 
 const SvgControls = require('./SvgControls.js');
+const VideoCameraSelector = require('./VideoCameraSelector.js')();
 
 class ARcad {
   constructor(element, svgDOM) {
@@ -293,6 +294,7 @@ const CreateGUI = (arcad, svgDOM) => {
         arcad.initTransform();
         arcad.element.appendChild(gui.domElement);
       }
+      VideoCameraSelector.setCamera(localStorage.getItem("video-camera") || -1);
       this._flipForeground = _flipForeground;
     },
     rotateVideo () {
@@ -362,6 +364,19 @@ const CreateGUI = (arcad, svgDOM) => {
     set invertDuration(_duration) {
       _.set(arcad, "svgControls.invertDuration", _duration);
       localStorage.setItem("invert-duration", _duration);
+    },
+    get camera() {
+      let defaultVal = localStorage.getItem("video-camera") || "-1";
+      let currentVal = this._camera || defaultVal;
+      VideoCameraSelector.setCamera(currentVal);
+      this._camera = currentVal;
+      localStorage.setItem("video-camera", currentVal);
+      return currentVal;
+    },
+    set camera(_camera) {
+      this._camera = _camera;
+      VideoCameraSelector.setCamera(_camera);
+      localStorage.setItem("video-camera", _camera);
     }
   };
 
@@ -379,6 +394,11 @@ const CreateGUI = (arcad, svgDOM) => {
   gui.videoFolder.add(menu, 'rotateVideo');
   gui.videoFolder.add(menu, 'flipVideoX');
   gui.videoFolder.add(menu, 'flipVideoY');
+
+  VideoCameraSelector.getVideoOptions().then((options) => {
+    gui.videoFolder.add(menu, 'camera', options);
+  });
+
   gui.svgFolder.add(menu, 'svgOpacity', 0, 100);
   gui.svgFolder.add(menu, 'neighbourDistance', 10);
   gui.svgFolder.add(menu, 'fluxelsInverted', false);
@@ -437,13 +457,16 @@ const CreateScene = (arcad, svgDOM) => {
   arcad.applyFlipRotateTransforms("video");
 
   arcad.scale = 1;
+  VideoCameraSelector.elem = video;
 
-  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
-        video.src = window.URL.createObjectURL(stream);
-        video.play();
-    });
-  }
+  // if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  //   navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+  //       VideoCameraSelector.stream = stream;
+  //       VideoCameraSelector.elem = video;
+  //       video.src = window.URL.createObjectURL(stream);
+  //       video.play();
+  //   });
+  // }
 
   let controls = new SvgControls(deviceContainer, svgDOM);
 

@@ -260,9 +260,12 @@ class SvgControls {
 
       path.onclick = (e) => {
         if (this.fluxelsInverted) {
-          // Disable standard click for inverted mode (as doesn't make sense)
-          this.paths.forEach((p)=>p.active = false);
-          if (_this.shiftDown == true) path.selected = true;
+          if (_this.shiftDown == true) {
+            this.paths.forEach((p)=>p.active = false);
+            path.selected = true;
+          } else {
+            path.active = !path.active;
+          }
           return;
         } else {
           let active = path.active;
