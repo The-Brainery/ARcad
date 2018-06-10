@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <script src="../../build/ARcad.web.js"></script>
+  </head>
+  <body>
+    <div id="myContent"></div>
+    <div id="svgContainer"></div>
+    <script>
+      const fs = require('fs');
+      const _ = require('lodash');
+      const {ipcRenderer} = require('electron');
+      // Load SVG file into svg container
+      const svgFile = fs.readFileSync('./fluxel9.svg').toString();
+      let svgContainer = document.querySelector("#svgContainer");
+      svgContainer.innerHTML = svgFile;
+
+      // Start arcad
+      let container = document.querySelector("#myContent");
+      let arcad = new ARcad(container, svgContainer.firstChild);
+
+      let fcn = _.debounce((e) => {
+        // Debounce to reduce write calls to arduino
+        let ids = _.map(e.active, "id");
+        ipcRenderer.send('turn-on-fluxel', {ids});
+      }, 100);
+
+      arcad.on("fluxels-updated", fcn);
+
+      let gui = arcad.gui;
+      gui.menu.connectJohnnyFive = () => {
+        ipcRenderer.send('start-board');
+        console.log("Connecting!!");
+      };
+
+      gui.customFolder.add(gui.menu, 'connectJohnnyFive');
+
+    </script>
+  </body>
+</html>
