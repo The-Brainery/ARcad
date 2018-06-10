@@ -25,17 +25,15 @@ SVG Object + camera overlay (and vice versa) with Perpective Transform and DOM e
 Open ```examples/basic/index.html``` in your web browser
 
 ### Electron example
-1. Ensure electron is installed globally and on the path ```npm i --global electron```
-2. Navigate to ```examples/electron```
-3. Run ```npm install``` or ```yarn install```
-4. Start the sample application via ```electron .```
+1. Navigate to ```examples/electron```
+2. Run ```npm install``` or ```yarn install```
+3. Start the sample application via ```npm run start``` or ```yarn start```
 
 ### Arduino + Electron example
-1. Ensure electron is installed globally and on the path ```npm i --global electron```
-2. Navigate to ```examples/arduino```
-3. Upload ```examples/arduino/serialReader/serialReader.ino``` to your arduino
+1. Navigate to ```examples/arduino```
+2. Upload ```examples/arduino/serialReader/serialReader.ino``` to your arduino
 3. Run ```npm install``` or ```yarn install``` from ```examples/arduino```
-4. Run ```electron .``` from ```examples/arduino```
+4. Run ```npm run start``` or ```yarn start``` from ```examples/arduino```
 
 ## Development
 
