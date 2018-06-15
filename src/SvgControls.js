@@ -246,13 +246,13 @@ class SvgControls {
           _.each(_this.fluxels, (p) => {
             p._selected = false;
             p.style.stroke = "";
-            this.style.strokeWidth = 20;
+            this.style.strokeWidth = 15;
           });
 
           this._selected = _selected;
           if (_selected == true) {
             this.style.stroke = RED;
-            this.style.strokeWidth = 20;
+            this.style.strokeWidth = 15;
           }
         }
       });
