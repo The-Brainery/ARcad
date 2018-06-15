@@ -16,15 +16,15 @@ const Ray = (x1,y1,x2,y2) => {
   return svgIntersections.shape("line", { x1, y1, x2, y2 });
 }
 
-const ACTIVE_LINE_OPTIONS = { width: 1, color: 'yellow'};
-const INACTIVE_LINE_OPTIONS = {width: 1, color: 'green'};
-const SELECTED_LINE_OPTIONS = {width: 1, color: 'red'};
+const ACTIVE_LINE_OPTIONS = { width: 15, color: 'yellow'};
+const INACTIVE_LINE_OPTIONS = {width: 15, color: 'green'};
+const SELECTED_LINE_OPTIONS = {width: 15, color: 'red'};
 
 class SvgControls {
   constructor(element, svgDOM) {
     _.extend(this, backbone.Events);
     this.element = element;
-    this.paths = [];
+    this.fluxels = [];
     this.init(element, svgDOM);
   }
 
@@ -53,10 +53,10 @@ class SvgControls {
     let ignoreId = ignore.getAttribute("id");
     let start = ray.params[0];
     let collisions = [];
-    _.each(this.paths, (path) => {
-      if (path.getAttribute("id") == ignoreId) return;
+    _.each(this.fluxels, (fluxel) => {
+      if (fluxel.getAttribute("id") == ignoreId) return;
 
-      let shape = path.svgIntersections;
+      let shape = fluxel.svgIntersections;
       var intersection = svgIntersections.intersect(ray,shape);
       if (intersection.points.length > 0) {
         let distances = [];
@@ -67,15 +67,15 @@ class SvgControls {
           distances.push(distance);
         });
         let distance = _.min(distances);
-        collisions.push({path, intersection, distance});
+        collisions.push({fluxel, intersection, distance});
       }
     });
     return collisions;
   }
 
-  getClosestCollision(path, direction){
+  getClosestCollision(fluxel, direction){
     let x1,y1,x2,y2,ray;
-    let bbox = path.getBBox();
+    let bbox = fluxel.getBBox();
     let collisions = [];
 
     if (_.includes(direction, "T")) {
@@ -123,7 +123,7 @@ class SvgControls {
     }
 
     ray = Ray(x1,y1,x2,y2);
-    collisions = this.castRay(ray, path);
+    collisions = this.castRay(ray, fluxel);
 
     let closest = _.sortBy(collisions, "distance")[0];
     return closest;
@@ -132,42 +132,42 @@ class SvgControls {
   moveLocal(e){
     let keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
     if (!_.includes(keys, e.code)) return;
-    let path = _.find(this.paths, "selected");
+    let fluxel = _.find(this.fluxels, "selected");
     let closest;
-    if (e.code == "ArrowUp") closest = this.getClosestCollision(path, "T");
-    if (e.code == "ArrowDown") closest = this.getClosestCollision(path, "B");
-    if (e.code == "ArrowLeft") closest = this.getClosestCollision(path, "L");
-    if (e.code == "ArrowRight") closest = this.getClosestCollision(path, "R");
+    if (e.code == "ArrowUp") closest = this.getClosestCollision(fluxel, "T");
+    if (e.code == "ArrowDown") closest = this.getClosestCollision(fluxel, "B");
+    if (e.code == "ArrowLeft") closest = this.getClosestCollision(fluxel, "L");
+    if (e.code == "ArrowRight") closest = this.getClosestCollision(fluxel, "R");
 
-    path.active = false;
+    fluxel.active = false;
     if (closest.distance > this.neighbourDistance) return;
     if (this.fluxelsInverted != true) {
-      closest.path.selected = true;
-      closest.path.active = true;
+      closest.fluxel.selected = true;
+      closest.fluxel.active = true;
     } else {
       // If inverted turn on all but the one selected;
-      this.paths.forEach((p)=>p.active = false);
+      this.fluxels.forEach((p)=>p.active = false);
 
       // Activate neighbours
       let dirs = ["L", "R", "T", "B", "TL", "TR", "BL", "BR"];
-      let neighbours = _.map(dirs, d=>this.getClosestCollision(path, d));
+      let neighbours = _.map(dirs, d=>this.getClosestCollision(fluxel, d));
 
-      // Turn on neighbour paths
+      // Turn on neighbour fluxels
       _.each(neighbours, (neighbour) => {
         if (neighbour == undefined) return;
         if (neighbour.distance > this.neighbourDistance) return;
-        neighbour.path.active = true;
+        neighbour.fluxel.active = true;
       });
-      path.active = true;
-      closest.path.selected = true;
-      closest.path.active = false;
+      fluxel.active = true;
+      closest.fluxel.selected = true;
+      closest.fluxel.active = false;
 
       // Turn off all after given duration
       setTimeout(() => {
-        let selected = _.find(this.paths, "selected");
+        let selected = _.find(this.fluxels, "selected");
         // if no longer selected, then dont turn off (timeout no longer relevent)
-        if (selected.id != _.get(closest, "path.id")) return;
-        this.paths.forEach((p)=>p.active = false);
+        if (selected.id != _.get(closest, "fluxel.id")) return;
+        this.fluxels.forEach((p)=>p.active = false);
       }, this.invertDuration);
     }
 
@@ -198,26 +198,26 @@ class SvgControls {
     svg.setAttribute("height", "100%");
     svg.style.opacity = "1.0";
     // Todo: Automatically figure out viewBox
-    this.paths = svg.querySelectorAll("[data-channels]");
+    this.fluxels = svg.querySelectorAll("[data-channels]");
 
     let _this = this;
 
     let activeRoute = {line: null, ids: null};
     let drawingRoute = false;
 
-    _.each(this.paths, (path) => {
+    _.each(this.fluxels, (fluxel) => {
 
-      const d = path.getAttribute("d");
-      path.svgIntersections = svgIntersections.shape("path", {d});
+      const d = fluxel.getAttribute("d");
+      fluxel.svgIntersections = svgIntersections.shape("path", {d});
 
       let active, selected;
 
-      if (path.active != undefined) {
-        active = path.active;
-        delete path.active;
+      if (fluxel.active != undefined) {
+        active = fluxel.active;
+        delete fluxel.active;
       }
 
-      Object.defineProperty(path, 'active', {
+      Object.defineProperty(fluxel, 'active', {
         configurable: true,
         get: function() {return this._active == true},
         set: function(_active) {
@@ -225,79 +225,80 @@ class SvgControls {
           if (_active == true) this.style.fill = GREEN;
           if (_active != true) this.style.fill = "";
           _this.trigger("fluxels-updated", {
-            active: _.filter(_this.paths, "active"),
-            selected: _.filter(_this.paths, "selected"),
-            all: _this.paths
+            active: _.filter(_this.fluxels, "active"),
+            selected: _.filter(_this.fluxels, "selected"),
+            all: _this.fluxels
           });
         }
       });
 
-      if (active != undefined) path.active = active;
+      if (active != undefined) fluxel.active = active;
 
-      if (path.selected != undefined) {
-        selected = path.selected;
-        delete path.selected;
+      if (fluxel.selected != undefined) {
+        selected = fluxel.selected;
+        delete fluxel.selected;
       }
-      Object.defineProperty(path, 'selected', {
+      Object.defineProperty(fluxel, 'selected', {
         configurable: true,
         get: function() {return this._selected == true},
         set: function(_selected) {
-          // Unselect all other paths:
-          _.each(_this.paths, (p) => {
+          // Unselect all other fluxels:
+          _.each(_this.fluxels, (p) => {
             p._selected = false;
             p.style.stroke = "";
+            this.style.strokeWidth = 20;
           });
 
           this._selected = _selected;
           if (_selected == true) {
             this.style.stroke = RED;
-            this.style.strokeWidth = 5;
+            this.style.strokeWidth = 20;
           }
         }
       });
 
-      if (selected != undefined) path.selected = selected;
+      if (selected != undefined) fluxel.selected = selected;
 
-      path.onclick = (e) => {
+      fluxel.onclick = (e) => {
         if (this.fluxelsInverted) {
           if (_this.shiftDown == true) {
-            this.paths.forEach((p)=>p.active = false);
-            path.selected = true;
+            this.fluxels.forEach((p)=>p.active = false);
+            fluxel.selected = true;
           } else {
-            path.active = !path.active;
+            fluxel.active = !fluxel.active;
           }
           return;
         } else {
-          let active = path.active;
-          path.active = !path.active;
-          if (_this.shiftDown == true) path.selected = true;
+          let active = fluxel.active;
+          fluxel.active = !fluxel.active;
+          if (_this.shiftDown == true) fluxel.selected = true;
         }
       };
 
-      path.onmousedown = (e) => {
+      fluxel.onmousedown = (e) => {
         if (e.button != 0) return;
         drawingRoute = true;
-        let ids = [path.id];
+        let ids = [fluxel.id];
         let line = draw.polyline().fill('none').stroke(ACTIVE_LINE_OPTIONS);
 
-        activeRoute.ids = [path.id];
-        activeRoute.channels = [path.dataset.channels];
+        activeRoute.ids = [fluxel.id];
+        activeRoute.channels = [fluxel.dataset.channels];
         activeRoute.line = line;
 
-        let bbox = path.getBBox();
+        let bbox = fluxel.getBBox();
         let x = bbox.x + bbox.width/2;
         let y = bbox.y + bbox.height/2;
 
         line.plot([[x, y]]);
       };
 
-      path.onmouseover = (e) => {
+      fluxel.onmouseover = (e) => {
         if (drawingRoute != true) return;
-        activeRoute.ids.push(path.id);
-        activeRoute.channels.push(path.dataset.channels);
+        activeRoute.ids.push(fluxel.id);
+        activeRoute.channels.push(fluxel.dataset.channels);
         let line = activeRoute.line;
         let prev = line.array();
-        let bbox = path.getBBox();
+        let bbox = fluxel.getBBox();
 
         let x = bbox.x + bbox.width/2;
         let y = bbox.y + bbox.height/2;
@@ -322,10 +323,10 @@ class SvgControls {
           transition: time
         });
         for (let [i, channel] of line.channels.entries()) {
-          let paths = svg.querySelectorAll(`[data-channels="${channel}"]`);
-          _.each(paths, (p) => p.active = true);
+          let fluxels = svg.querySelectorAll(`[data-channels="${channel}"]`);
+          _.each(fluxels, (p) => p.active = true);
           await new Promise((res,rej)=>setTimeout(res, time));
-          _.each(paths, (p) => p.active = false);
+          _.each(fluxels, (p) => p.active = false);
         }
       };
 
