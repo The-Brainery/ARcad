@@ -207,8 +207,22 @@ class SvgControls {
 
     _.each(this.fluxels, (fluxel) => {
 
-      const d = fluxel.getAttribute("d");
-      fluxel.svgIntersections = svgIntersections.shape("path", {d});
+      switch (fluxel.tagName) {
+        case "path":
+          const d = fluxel.getAttribute("d");
+          fluxel.svgIntersections = svgIntersections.shape("path", {d});
+          break;
+        case "polygon":
+          const points = fluxel.getAttribute("points");
+          fluxel.svgIntersections = svgIntersections.shape("polygon", {points});
+          break;
+        case "circle":
+          const cx = fluxel.getAttribute("cx");
+          const cy = fluxel.getAttribute("cy");
+          const r = fluxel.getAttribute("r");
+          fluxel.svgIntersections = svgIntersections.shape("circle", {cx, cy, r});
+          break;
+      }
 
       let active, selected;
 
