@@ -21932,7 +21932,8 @@ const CreateGUI = (arcad, svgDOM) => {
     get camera() {
       let defaultVal = localStorage.getItem("video-camera") || "-1";
       let currentVal = this._camera || defaultVal;
-      VideoCameraSelector.setCamera(currentVal);
+      if (this._camera == undefined)
+        VideoCameraSelector.setCamera(currentVal);
       this._camera = currentVal;
       localStorage.setItem("video-camera", currentVal);
       return currentVal;
