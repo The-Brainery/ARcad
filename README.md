@@ -49,7 +49,7 @@ Open ```examples/basic/index.html``` in your web browser
 
 2. Ensure the svg contains a viewBox attribute ```<svg viewBox="0 0 67 67" ...>```html in the root node. If the viewBox attribute is not present, simply add it manually (```<svg viewBox="0 0 WIDTH HEIGHT" ...>```). Play with WIDTH and HEIGHT until it looks proper in the browser (if too large: the svg will appear padded on the right/bottom sides; if too small: the svg will be cropped)
 
-3. Ensure that your fluxels have an attribute called "data-channels" and an "id" attribute. "data-channels" defines how the fluxels are connected, and is used as a selector. The id is used for restoring the state of the svg upon reload. 
+3. Ensure that your fluxels have an attribute called "data-channels" and an "id" attribute. The id attribute must be unique for every fluxel! "data-channels" defines how the fluxels are connected, and is used as a selector. The id is used for restoring the state of the svg upon reload. 
 
 ## Help
 
