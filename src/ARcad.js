@@ -276,13 +276,17 @@ const CreateGUI = (arcad, svgDOM) => {
       localStorage.setItem("transition", _time);
     },
     get hideAnchors() {
-      return this._hideAnchors || false;
+      let defaultVal = JSON.parse(localStorage.getItem("hide-anchors") || "false");
+      let currentVal = this._hideAnchors;
+      if (currentVal == undefined) this.hideAnchors = defaultVal;
+      return this._hideAnchors;
     },
     set hideAnchors(_hideAnchors) {
       let corners = arcad.element.querySelectorAll(".corner");
       if (_hideAnchors == false) _.each(corners, (c) => c.style.display = "block")
       if (_hideAnchors == true) _.each(corners, (c) => c.style.display = "none")
       this._hideAnchors = _hideAnchors;
+      localStorage.setItem("hide-anchors", _hideAnchors);
     },
     get flipForeground() {
       let placement = localStorage.getItem("placement");
