@@ -57,18 +57,21 @@ class ARcad {
       this.element.addEventListener("mouseup", this.mouseup.bind(this));
       this.element.addEventListener("mousemove", this.move.bind(this));
 
+      const green = "rgba(32, 212, 66, 0.5)";
+      const white = "rgba(255, 255, 255, 0.5)";
+
       document.addEventListener("keydown", (e) => {
         let markers = this.element.querySelectorAll(".corner");
         if (e.key != "Shift") return;
         this.shiftDown = true;
-        _.each(markers, (m) => m.style.background = "green");
+        _.each(markers, (m) => m.style.background = green);
       });
 
       document.addEventListener("keyup", (e) => {
         let markers = this.element.querySelectorAll(".corner");
         if (e.key != "Shift") return;
         this.shiftDown = false;
-        _.each(markers, (m) => m.style.background = "white");
+        _.each(markers, (m) => m.style.background = white);
       });
     }, 1000);
 
@@ -115,9 +118,13 @@ class ARcad {
   }
 
   mousedown(e) {
+    let cornerElem = this.element.querySelectorAll(".corner");
+    if (_.get(cornerElem, "[0].style.display") == "none") return;
+
     let container = this.element.querySelector("#container-outer");
     let bbox = container.getBoundingClientRect();
     let corners = getScaledCoordinates(this.corners, bbox, this.scale);
+
     let x, y, dx, dy;
     let best = 1000;
 

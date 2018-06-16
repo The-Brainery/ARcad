@@ -213,7 +213,8 @@ class SvgControls {
           fluxel.svgIntersections = svgIntersections.shape("path", {d});
           break;
         case "polygon":
-          const points = fluxel.getAttribute("points");
+          const pointAttr = fluxel.points;
+          const points = _.map(pointAttr, (p) => `${p.x},${p.y}`).join(" ");
           fluxel.svgIntersections = svgIntersections.shape("polygon", {points});
           break;
         case "circle":
