@@ -1,6 +1,7 @@
 <html>
   <head>
     <title>ArCAD Arduino Example</title>
+    <script src="../../build/ARcad.web.js"></script>
     <link rel="stylesheet" type="text/css" href="../../node_modules/basiccontext/dist/basicContext.min.css">
     <link rel="stylesheet" type="text/css" href="../../node_modules/basiccontext/dist/themes/default.min.css">
   </head>
@@ -8,18 +9,12 @@
     <div id="myContent"></div>
     <div id="svgContainer"></div>
     <script>
-    var hook = require('node-hook');
     const SerialPort = require('serialport');
-
-    hook.hook('.css', (source, filename) => {
-      // Override css hooks (load these files using <link> tags instead)
-      return undefined;
-    });
-
+    const _ = require('lodash');
     const fs = require('fs');
-    const ARcad = require('../../src/ARcad.js');
+    const FILENAME = './opendrop.svg';
 
-    const svgFile = fs.readFileSync('../default.svg').toString();
+    const svgFile = fs.readFileSync(FILENAME).toString();
 
     let svgContainer = document.querySelector("#svgContainer");
     svgContainer.innerHTML = svgFile;
@@ -38,14 +33,54 @@
           this._comName = comName;
           const base = new SerialPort(comName, 9600);
 
-           base.on('open', () => {
-             arcad.on("fluxels-updated", (e) => {
-               // Write to serial on arduino 
-               base.write("blink\n");
-             });
+         base.on('open', () => {
+           arcad.on("fluxels-updated", (e) => {
+             // Write to serial on arduino
+             base.write("blink\n");
            });
+         });
         }
       });
+
+      Object.defineProperty(menu, 'channel', {
+        configurable: true,
+        get: function() {
+          let selected = _.find(arcad.svgControls.fluxels, 'selected');
+          if (selected == undefined) return '';
+          else return selected.dataset.channels;
+        },
+        set: function(val) {
+          let selected = _.find(arcad.svgControls.fluxels, 'selected');
+          if (selected == undefined) return;
+          if (val == '') return;
+          selected.setAttribute("data-channels", val);
+        }
+      });
+
+      Object.defineProperty(menu, 'id', {
+        configurable: true,
+        get: function() {
+          let selected = _.find(arcad.svgControls.fluxels, 'selected');
+          if (selected == undefined) return '';
+          return selected.id;
+        },
+        set: function(val) {
+          // Make readonly
+          return
+        }
+      });
+
+      menu.update = () => {
+        // Save svg file
+        let svgContent = arcad.svgControls.element.innerHTML;
+        fs.writeFileSync(FILENAME, svgContent);
+        alert("File Saved!");
+      }
+
+
+      arcad.gui.customFolder.add(menu, 'channel', '').listen();
+      arcad.gui.customFolder.add(menu, 'id', '').listen();
+      arcad.gui.customFolder.add(menu, 'update');
 
       let comNames = serialDevices.map((d)=>d.comName);
       arcad.gui.customFolder.add(menu, 'serialDevice', comNames);
@@ -55,9 +90,11 @@
         s.style.width = "100%";
       });
 
+      arcad.on("fluxels-updated", _.debounce((dat) => {
+        menu.channel = _.get(dat, "selected[0].dataset.channels");
+      }, 100));
+
     });
-
-
 
     </script>
   </body>

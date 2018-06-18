@@ -38856,6 +38856,12 @@ class SvgControls {
             this.style.stroke = RED;
             this.style.strokeWidth = 15;
           }
+
+          _this.trigger("fluxels-updated", {
+            active: _.filter(_this.fluxels, "active"),
+            selected: _.filter(_this.fluxels, "selected"),
+            all: _this.fluxels
+          });
         }
       });
 
