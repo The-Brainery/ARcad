@@ -1,7 +1,7 @@
 {
   "name": "johnny-five",
   "version": "1.0.0",
-  "main": "main.js",
+  "main": "ferrobot2.js",
   "license": "MIT",
   "dependencies": {
     "electron-rebuild": "^1.7.3",

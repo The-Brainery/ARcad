@@ -389,6 +389,20 @@ const CreateGUI = (arcad, svgDOM) => {
       this._camera = _camera;
       VideoCameraSelector.setCamera(_camera);
       localStorage.setItem("video-camera", _camera);
+    },
+    get strokeWidth() {
+      let _strokeWidth;
+      if (this._strokeWidth == undefined) {
+        _strokeWidth = parseInt(localStorage.getItem("stroke-width")) || _.get(arcad, "svgControls.strokeWidth");
+        this._strokeWidth = _strokeWidth;
+        _.set(arcad, "svgControls.strokeWidth", _strokeWidth);
+      }
+      return this._strokeWidth;
+    },
+    set strokeWidth(_strokeWidth) {
+      _.set(arcad, "svgControls.strokeWidth", _strokeWidth);
+      localStorage.setItem("stroke-width", _strokeWidth);
+      this._strokeWidth = _strokeWidth;
     }
   };
 
@@ -415,6 +429,7 @@ const CreateGUI = (arcad, svgDOM) => {
   gui.svgFolder.add(menu, 'neighbourDistance', 10);
   gui.svgFolder.add(menu, 'fluxelsInverted', false);
   gui.svgFolder.add(menu, 'invertDuration', 1000);
+  gui.svgFolder.add(menu, 'strokeWidth', 0, 40);
 
   gui.domElement.style.position = "absolute";
   gui.domElement.style.top = "0px";
@@ -529,6 +544,7 @@ const Styles = {
     background: rgba(255,255,255,0.5);
     user-select: none;
     z-index: 20;
+    cursor: move;
   `,
   background: `
     position:relative;
