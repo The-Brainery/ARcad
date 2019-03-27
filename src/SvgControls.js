@@ -16,9 +16,18 @@ const Ray = (x1,y1,x2,y2) => {
   return svgIntersections.shape("line", { x1, y1, x2, y2 });
 }
 
-const ACTIVE_LINE_OPTIONS = { width: 15, color: 'yellow'};
-const INACTIVE_LINE_OPTIONS = {width: 15, color: 'green'};
-const SELECTED_LINE_OPTIONS = {width: 15, color: 'red'};
+
+const LINE_TYPES = {
+  ACTIVE: "yellow",
+  INACTIVE: "green",
+  SELECTED: "red"
+};
+
+const GetLineOptions = (type=LINE_TYPES.INACTIVE) => {
+  let width = parseFloat(localStorage.getItem("stroke-width")) || 15;
+  let color = type;
+  return {width, color}
+}
 
 class SvgControls {
   constructor(element, svgDOM) {
@@ -302,7 +311,11 @@ class SvgControls {
         if (e.button != 0) return;
         drawingRoute = true;
         let ids = [fluxel.id];
-        let line = draw.polyline().fill('none').stroke(ACTIVE_LINE_OPTIONS);
+
+
+        let time = parseInt(localStorage.getItem("transition")) || 1000;
+
+        let line = draw.polyline().fill('none').stroke(GetLineOptions(LINE_TYPES.ACTIVE));
 
         activeRoute.ids = [fluxel.id];
         activeRoute.channels = [fluxel.dataset.channels];
@@ -334,7 +347,7 @@ class SvgControls {
       if (drawingRoute != true) return;
       drawingRoute = false;
       const line = activeRoute.line;
-      line.stroke(INACTIVE_LINE_OPTIONS);
+      line.stroke(GetLineOptions(LINE_TYPES.INACTIVE));
       line.ids = activeRoute.ids;
       line.channels = activeRoute.channels;
       line.node.setAttribute("class", "route");
@@ -362,12 +375,12 @@ class SvgControls {
       }
 
       line.node.addEventListener("contextmenu", (e) => {
-        line.stroke(SELECTED_LINE_OPTIONS);
+        line.stroke(GetLineOptions(LINE_TYPES.SELECTED));
 
         // Unselect on "click" action
         let unselectFcn;
         unselectFcn = (e) => {
-          line.stroke(INACTIVE_LINE_OPTIONS);
+          line.stroke(GetLineOptions(LINE_TYPES.INACTIVE));
           document.removeEventListener("click", unselectFcn);
         }
         document.addEventListener("click", unselectFcn);
