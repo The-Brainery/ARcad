@@ -1,0 +1,196 @@
+<svg width="2480px" height="2480px" viewBox="0 0 2480 2480" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g id="FerrobotLarge" fill="#5689A4">
+      <circle data-channels="0" id="19-18" cx="2294" cy="2418" r="62"></circle>
+      <circle data-channels="1" id="18-18" cx="2294" cy="2294" r="62"></circle>
+      <circle data-channels="2" id="18-17" cx="2170" cy="2294" r="62"></circle>
+      <circle data-channels="3" id="18-16" cx="2046" cy="2294" r="62"></circle>
+      <circle data-channels="4" id="17-16" cx="2046" cy="2170" r="62"></circle>
+      <circle data-channels="5" id="16-16" cx="2046" cy="2046" r="62"></circle>
+      <circle data-channels="6" id="16-17" cx="2170" cy="2046" r="62"></circle>
+      <circle data-channels="7" id="16-18" cx="2294" cy="2046" r="62"></circle>
+      <circle data-channels="8" id="17-18" cx="2294" cy="2170" r="62"></circle>
+      <circle data-channels="9" id="15-16" cx="2046" cy="1922" r="62"></circle>
+      <circle data-channels="10" id="16-15" cx="1922" cy="2046" r="62"></circle>
+      <circle data-channels="11" id="18-19" cx="2418" cy="2294" r="62"></circle>
+      <circle data-channels="12" id="19-8" cx="1054" cy="2418" r="62"></circle>
+      <circle data-channels="13" id="18-8" cx="1054" cy="2294" r="62"></circle>
+      <circle data-channels="14" id="18-7" cx="930" cy="2294" r="62"></circle>
+      <circle data-channels="15" id="18-6" cx="806" cy="2294" r="62"></circle>
+      <circle data-channels="16" id="17-6" cx="806" cy="2170" r="62"></circle>
+      <circle data-channels="17" id="16-6" cx="806" cy="2046" r="62"></circle>
+      <circle data-channels="18" id="16-7" cx="930" cy="2046" r="62"></circle>
+      <circle data-channels="19" id="16-8" cx="1054" cy="2046" r="62"></circle>
+      <circle data-channels="20" id="17-8" cx="1054" cy="2170" r="62"></circle>
+      <circle data-channels="21" id="15-6" cx="806" cy="1922" r="62"></circle>
+      <circle data-channels="22" id="16-5" cx="682" cy="2046" r="62"></circle>
+      <circle data-channels="23" id="18-9" cx="1178" cy="2294" r="62"></circle>
+      <circle data-channels="24" id="14-3" cx="434" cy="1798" r="62"></circle>
+      <circle data-channels="25" id="13-3" cx="434" cy="1674" r="62"></circle>
+      <circle data-channels="26" id="13-2" cx="310" cy="1674" r="62"></circle>
+      <circle data-channels="27" id="13-1" cx="186" cy="1674" r="62"></circle>
+      <circle data-channels="28" id="12-1" cx="186" cy="1550" r="62"></circle>
+      <circle data-channels="29" id="11-1" cx="186" cy="1426" r="62"></circle>
+      <circle data-channels="30" id="11-2" cx="310" cy="1426" r="62"></circle>
+      <circle data-channels="31" id="11-3" cx="434" cy="1426" r="62"></circle>
+      <circle data-channels="32" id="12-3" cx="434" cy="1550" r="62"></circle>
+      <circle data-channels="33" id="10-1" cx="186" cy="1302" r="62"></circle>
+      <circle data-channels="34" id="11-0" cx="62" cy="1426" r="62"></circle>
+      <circle data-channels="35" id="13-4" cx="558" cy="1674" r="62"></circle>
+      <circle data-channels="36" id="18-10" cx="1302" cy="2294" r="62"></circle>
+      <circle data-channels="37" id="18-11" cx="1426" cy="2294" r="62"></circle>
+      <circle data-channels="38" id="17-11" cx="1426" cy="2170" r="62"></circle>
+      <circle data-channels="39" id="16-11" transform="translate(1426.000000, 2046.000000) rotate(90.000000) translate(-1426.000000, -2046.000000) " cx="1426" cy="2046" r="62"></circle>
+      <circle data-channels="40" id="16-12" transform="translate(1550.000000, 2046.000000) rotate(90.000000) translate(-1550.000000, -2046.000000) " cx="1550" cy="2046" r="62"></circle>
+      <circle data-channels="41" id="16-13" transform="translate(1674.000000, 2046.000000) rotate(90.000000) translate(-1674.000000, -2046.000000) " cx="1674" cy="2046" r="62"></circle>
+      <circle data-channels="42" id="17-13" transform="translate(1674.000000, 2170.000000) rotate(90.000000) translate(-1674.000000, -2170.000000) " cx="1674" cy="2170" r="62"></circle>
+      <circle data-channels="43" id="18-13" transform="translate(1674.000000, 2294.000000) rotate(90.000000) translate(-1674.000000, -2294.000000) " cx="1674" cy="2294" r="62"></circle>
+      <circle data-channels="44" id="18-12" transform="translate(1550.000000, 2294.000000) rotate(90.000000) translate(-1550.000000, -2294.000000) " cx="1550" cy="2294" r="62"></circle>
+      <circle data-channels="45" id="16-14" transform="translate(1798.000000, 2046.000000) rotate(90.000000) translate(-1798.000000, -2046.000000) " cx="1798" cy="2046" r="62"></circle>
+      <circle data-channels="46" id="15-13" transform="translate(1674.000000, 1922.000000) rotate(90.000000) translate(-1674.000000, -1922.000000) " cx="1674" cy="1922" r="62"></circle>
+      <circle data-channels="47" id="19-11" transform="translate(1426.000000, 2418.000000) rotate(90.000000) translate(-1426.000000, -2418.000000) " cx="1426" cy="2418" r="62"></circle>
+      <circle data-channels="48" id="18-0" transform="translate(62.000000, 2294.000000) rotate(90.000000) translate(-62.000000, -2294.000000) " cx="62" cy="2294" r="62"></circle>
+      <circle data-channels="49" id="18-1" transform="translate(186.000000, 2294.000000) rotate(90.000000) translate(-186.000000, -2294.000000) " cx="186" cy="2294" r="62"></circle>
+      <circle data-channels="50" id="17-1" transform="translate(186.000000, 2170.000000) rotate(90.000000) translate(-186.000000, -2170.000000) " cx="186" cy="2170" r="62"></circle>
+      <circle data-channels="51" id="16-1" transform="translate(186.000000, 2046.000000) rotate(90.000000) translate(-186.000000, -2046.000000) " cx="186" cy="2046" r="62"></circle>
+      <circle data-channels="52" id="16-2" transform="translate(310.000000, 2046.000000) rotate(90.000000) translate(-310.000000, -2046.000000) " cx="310" cy="2046" r="62"></circle>
+      <circle data-channels="53" id="16-3" transform="translate(434.000000, 2046.000000) rotate(90.000000) translate(-434.000000, -2046.000000) " cx="434" cy="2046" r="62"></circle>
+      <circle data-channels="54" id="17-3" transform="translate(434.000000, 2170.000000) rotate(90.000000) translate(-434.000000, -2170.000000) " cx="434" cy="2170" r="62"></circle>
+      <circle data-channels="55" id="18-3" transform="translate(434.000000, 2294.000000) rotate(90.000000) translate(-434.000000, -2294.000000) " cx="434" cy="2294" r="62"></circle>
+      <circle data-channels="56" id="18-2" transform="translate(310.000000, 2294.000000) rotate(90.000000) translate(-310.000000, -2294.000000) " cx="310" cy="2294" r="62"></circle>
+      <circle data-channels="57" id="16-4" transform="translate(558.000000, 2046.000000) rotate(90.000000) translate(-558.000000, -2046.000000) " cx="558" cy="2046" r="62"></circle>
+      <circle data-channels="58" id="15-3" transform="translate(434.000000, 1922.000000) rotate(90.000000) translate(-434.000000, -1922.000000) " cx="434" cy="1922" r="62"></circle>
+      <circle data-channels="59" id="19-1" transform="translate(186.000000, 2418.000000) rotate(90.000000) translate(-186.000000, -2418.000000) " cx="186" cy="2418" r="62"></circle>
+      <circle data-channels="60" id="9-18" cx="2294" cy="1178" r="62"></circle>
+      <circle data-channels="61" id="8-18" cx="2294" cy="1054" r="62"></circle>
+      <circle data-channels="62" id="8-17" cx="2170" cy="1054" r="62"></circle>
+      <circle data-channels="63" id="8-16" cx="2046" cy="1054" r="62"></circle>
+      <circle data-channels="64" id="7-16" cx="2046" cy="930" r="62"></circle>
+      <circle data-channels="65" id="6-16" cx="2046" cy="806" r="62"></circle>
+      <circle data-channels="66" id="6-17" cx="2170" cy="806" r="62"></circle>
+      <circle data-channels="67" id="6-18" cx="2294" cy="806" r="62"></circle>
+      <circle data-channels="68" id="7-18" cx="2294" cy="930" r="62"></circle>
+      <circle data-channels="69" id="5-16" cx="2046" cy="682" r="62"></circle>
+      <circle data-channels="70" id="6-15" cx="1922" cy="806" r="62"></circle>
+      <circle data-channels="71" id="8-19" cx="2418" cy="1054" r="62"></circle>
+      <circle data-channels="72" id="9-8" cx="1054" cy="1178" r="62"></circle>
+      <circle data-channels="73" id="8-8" cx="1054" cy="1054" r="62"></circle>
+      <circle data-channels="74" id="8-7" cx="930" cy="1054" r="62"></circle>
+      <circle data-channels="75" id="8-6" cx="806" cy="1054" r="62"></circle>
+      <circle data-channels="76" id="7-6" cx="806" cy="930" r="62"></circle>
+      <circle data-channels="77" id="6-6" cx="806" cy="806" r="62"></circle>
+      <circle data-channels="78" id="6-7" cx="930" cy="806" r="62"></circle>
+      <circle data-channels="79" id="6-8" cx="1054" cy="806" r="62"></circle>
+      <circle data-channels="80" id="7-8" cx="1054" cy="930" r="62"></circle>
+      <circle data-channels="81" id="5-6" cx="806" cy="682" r="62"></circle>
+      <circle data-channels="82" id="6-5" cx="682" cy="806" r="62"></circle>
+      <circle data-channels="83" id="8-9" cx="1178" cy="1054" r="62"></circle>
+      <circle data-channels="84" id="8-10" cx="1302" cy="1054" r="62"></circle>
+      <circle data-channels="85" id="8-11" cx="1426" cy="1054" r="62"></circle>
+      <circle data-channels="86" id="7-11" cx="1426" cy="930" r="62"></circle>
+      <circle data-channels="87" id="6-11" cx="1426" cy="806" r="62"></circle>
+      <circle data-channels="88" id="6-12" cx="1550" cy="806" r="62"></circle>
+      <circle data-channels="89" id="6-13" cx="1674" cy="806" r="62"></circle>
+      <circle data-channels="90" id="7-13" cx="1674" cy="930" r="62"></circle>
+      <circle data-channels="91" id="8-13" cx="1674" cy="1054" r="62"></circle>
+      <circle data-channels="92" id="8-12" cx="1550" cy="1054" r="62"></circle>
+      <circle data-channels="93" id="6-14" cx="1798" cy="806" r="62"></circle>
+      <circle data-channels="94" id="5-13" cx="1674" cy="682" r="62"></circle>
+      <circle data-channels="95" id="9-11" cx="1426" cy="1178" r="62"></circle>
+      <circle data-channels="96" id="8-0" cx="62" cy="1054" r="62"></circle>
+      <circle data-channels="97" id="8-1" cx="186" cy="1054" r="62"></circle>
+      <circle data-channels="98" id="7-1" cx="186" cy="930" r="62"></circle>
+      <circle data-channels="99" id="6-1" cx="186" cy="806" r="62"></circle>
+      <circle data-channels="100" id="6-2" cx="310" cy="806" r="62"></circle>
+      <circle data-channels="101" id="6-3" cx="434" cy="806" r="62"></circle>
+      <circle data-channels="102" id="7-3" cx="434" cy="930" r="62"></circle>
+      <circle data-channels="103" id="8-3" cx="434" cy="1054" r="62"></circle>
+      <circle data-channels="104" id="8-2" cx="310" cy="1054" r="62"></circle>
+      <circle data-channels="105" id="6-4" cx="558" cy="806" r="62"></circle>
+      <circle data-channels="106" id="5-3" cx="434" cy="682" r="62"></circle>
+      <circle data-channels="107" id="9-1" cx="186" cy="1178" r="62"></circle>
+      <circle data-channels="108" id="13-5" cx="682" cy="1674" r="62"></circle>
+      <circle data-channels="109" id="13-6" cx="806" cy="1674" r="62"></circle>
+      <circle data-channels="110" id="12-6" cx="806" cy="1550" r="62"></circle>
+      <circle data-channels="111" id="11-6" cx="806" cy="1426" r="62"></circle>
+      <circle data-channels="112" id="11-7" cx="930" cy="1426" r="62"></circle>
+      <circle data-channels="113" id="11-8" transform="translate(1054.000000, 1426.000000) rotate(90.000000) translate(-1054.000000, -1426.000000) " cx="1054" cy="1426" r="62"></circle>
+      <circle data-channels="114" id="12-8" transform="translate(1054.000000, 1550.000000) rotate(90.000000) translate(-1054.000000, -1550.000000) " cx="1054" cy="1550" r="62"></circle>
+      <circle data-channels="115" id="13-8" transform="translate(1054.000000, 1674.000000) rotate(90.000000) translate(-1054.000000, -1674.000000) " cx="1054" cy="1674" r="62"></circle>
+      <circle data-channels="116" id="13-7" transform="translate(930.000000, 1674.000000) rotate(90.000000) translate(-930.000000, -1674.000000) " cx="930" cy="1674" r="62"></circle>
+      <circle data-channels="117" id="11-9" transform="translate(1178.000000, 1426.000000) rotate(90.000000) translate(-1178.000000, -1426.000000) " cx="1178" cy="1426" r="62"></circle>
+      <circle data-channels="118" id="10-8" transform="translate(1054.000000, 1302.000000) rotate(90.000000) translate(-1054.000000, -1302.000000) " cx="1054" cy="1302" r="62"></circle>
+      <circle data-channels="119" id="14-6" transform="translate(806.000000, 1798.000000) rotate(90.000000) translate(-806.000000, -1798.000000) " cx="806" cy="1798" r="62"></circle>
+      <circle data-channels="120" id="14-13" cx="1674" cy="1798" r="62"></circle>
+      <circle data-channels="121" id="13-13" cx="1674" cy="1674" r="62"></circle>
+      <circle data-channels="122" id="13-12" cx="1550" cy="1674" r="62"></circle>
+      <circle data-channels="123" id="13-11" cx="1426" cy="1674" r="62"></circle>
+      <circle data-channels="124" id="12-11" cx="1426" cy="1550" r="62"></circle>
+      <circle data-channels="125" id="11-11" cx="1426" cy="1426" r="62"></circle>
+      <circle data-channels="126" id="11-12" cx="1550" cy="1426" r="62"></circle>
+      <circle data-channels="127" id="11-13" cx="1674" cy="1426" r="62"></circle>
+      <circle data-channels="128" id="12-13" cx="1674" cy="1550" r="62"></circle>
+      <circle data-channels="129" id="10-11" cx="1426" cy="1302" r="62"></circle>
+      <circle data-channels="130" id="11-10" cx="1302" cy="1426" r="62"></circle>
+      <circle data-channels="131" id="13-14" cx="1798" cy="1674" r="62"></circle>
+      <circle data-channels="132" id="13-15" transform="translate(1922.000000, 1674.000000) rotate(90.000000) translate(-1922.000000, -1674.000000) " cx="1922" cy="1674" r="62"></circle>
+      <circle data-channels="133" id="13-16" transform="translate(2046.000000, 1674.000000) rotate(90.000000) translate(-2046.000000, -1674.000000) " cx="2046" cy="1674" r="62"></circle>
+      <circle data-channels="134" id="12-16" transform="translate(2046.000000, 1550.000000) rotate(90.000000) translate(-2046.000000, -1550.000000) " cx="2046" cy="1550" r="62"></circle>
+      <circle data-channels="135" id="11-16" transform="translate(2046.000000, 1426.000000) rotate(90.000000) translate(-2046.000000, -1426.000000) " cx="2046" cy="1426" r="62"></circle>
+      <circle data-channels="136" id="11-17" transform="translate(2170.000000, 1426.000000) rotate(90.000000) translate(-2170.000000, -1426.000000) " cx="2170" cy="1426" r="62"></circle>
+      <circle data-channels="137" id="11-18" transform="translate(2294.000000, 1426.000000) rotate(90.000000) translate(-2294.000000, -1426.000000) " cx="2294" cy="1426" r="62"></circle>
+      <circle data-channels="138" id="12-18" transform="translate(2294.000000, 1550.000000) rotate(90.000000) translate(-2294.000000, -1550.000000) " cx="2294" cy="1550" r="62"></circle>
+      <circle data-channels="139" id="13-18" transform="translate(2294.000000, 1674.000000) rotate(90.000000) translate(-2294.000000, -1674.000000) " cx="2294" cy="1674" r="62"></circle>
+      <circle data-channels="140" id="13-17" transform="translate(2170.000000, 1674.000000) rotate(90.000000) translate(-2170.000000, -1674.000000) " cx="2170" cy="1674" r="62"></circle>
+      <circle data-channels="141" id="11-19" transform="translate(2418.000000, 1426.000000) rotate(90.000000) translate(-2418.000000, -1426.000000) " cx="2418" cy="1426" r="62"></circle>
+      <circle data-channels="142" id="10-18" transform="translate(2294.000000, 1302.000000) rotate(90.000000) translate(-2294.000000, -1302.000000) " cx="2294" cy="1302" r="62"></circle>
+      <circle data-channels="143" id="14-16" transform="translate(2046.000000, 1798.000000) rotate(90.000000) translate(-2046.000000, -1798.000000) " cx="2046" cy="1798" r="62"></circle>
+      <circle data-channels="144" id="4-3" cx="434" cy="558" r="62"></circle>
+      <circle data-channels="145" id="3-3" cx="434" cy="434" r="62"></circle>
+      <circle data-channels="146" id="3-2" cx="310" cy="434" r="62"></circle>
+      <circle data-channels="147" id="3-1" cx="186" cy="434" r="62"></circle>
+      <circle data-channels="148" id="2-1" cx="186" cy="310" r="62"></circle>
+      <circle data-channels="149" id="1-1" cx="186" cy="186" r="62"></circle>
+      <circle data-channels="150" id="1-2" cx="310" cy="186" r="62"></circle>
+      <circle data-channels="160" id="1-3" cx="434" cy="186" r="62"></circle>
+      <circle data-channels="161" id="2-3" cx="434" cy="310" r="62"></circle>
+      <circle data-channels="162" id="0-1" cx="186" cy="62" r="62"></circle>
+      <circle data-channels="163" id="1-0" cx="62" cy="186" r="62"></circle>
+      <circle data-channels="164" id="3-4" cx="558" cy="434" r="62"></circle>
+      <circle data-channels="165" id="3-5" transform="translate(682.000000, 434.000000) rotate(90.000000) translate(-682.000000, -434.000000) " cx="682" cy="434" r="62"></circle>
+      <circle data-channels="166" id="3-6" transform="translate(806.000000, 434.000000) rotate(90.000000) translate(-806.000000, -434.000000) " cx="806" cy="434" r="62"></circle>
+      <circle data-channels="167" id="2-6" transform="translate(806.000000, 310.000000) rotate(90.000000) translate(-806.000000, -310.000000) " cx="806" cy="310" r="62"></circle>
+      <circle data-channels="168" id="1-6" transform="translate(806.000000, 186.000000) rotate(90.000000) translate(-806.000000, -186.000000) " cx="806" cy="186" r="62"></circle>
+      <circle data-channels="169" id="1-7" transform="translate(930.000000, 186.000000) rotate(90.000000) translate(-930.000000, -186.000000) " cx="930" cy="186" r="62"></circle>
+      <circle data-channels="170" id="1-8" transform="translate(1054.000000, 186.000000) rotate(90.000000) translate(-1054.000000, -186.000000) " cx="1054" cy="186" r="62"></circle>
+      <circle data-channels="171" id="2-8" transform="translate(1054.000000, 310.000000) rotate(90.000000) translate(-1054.000000, -310.000000) " cx="1054" cy="310" r="62"></circle>
+      <circle data-channels="172" id="3-8" transform="translate(1054.000000, 434.000000) rotate(90.000000) translate(-1054.000000, -434.000000) " cx="1054" cy="434" r="62"></circle>
+      <circle data-channels="173" id="3-7" transform="translate(930.000000, 434.000000) rotate(90.000000) translate(-930.000000, -434.000000) " cx="930" cy="434" r="62"></circle>
+      <circle data-channels="174" id="1-9" transform="translate(1178.000000, 186.000000) rotate(90.000000) translate(-1178.000000, -186.000000) " cx="1178" cy="186" r="62"></circle>
+      <circle data-channels="175" id="0-8" transform="translate(1054.000000, 62.000000) rotate(90.000000) translate(-1054.000000, -62.000000) " cx="1054" cy="62" r="62"></circle>
+      <circle data-channels="176" id="4-6" transform="translate(806.000000, 558.000000) rotate(90.000000) translate(-806.000000, -558.000000) " cx="806" cy="558" r="62"></circle>
+      <circle data-channels="177" id="4-13" cx="1674" cy="558" r="62"></circle>
+      <circle data-channels="178" id="3-13" cx="1674" cy="434" r="62"></circle>
+      <circle data-channels="179" id="3-12" cx="1550" cy="434" r="62"></circle>
+      <circle data-channels="180" id="3-11" cx="1426" cy="434" r="62"></circle>
+      <circle data-channels="181" id="2-11" cx="1426" cy="310" r="62"></circle>
+      <circle data-channels="182" id="1-11" cx="1426" cy="186" r="62"></circle>
+      <circle data-channels="183" id="1-12" cx="1550" cy="186" r="62"></circle>
+      <circle data-channels="184" id="1-13" cx="1674" cy="186" r="62"></circle>
+      <circle data-channels="185" id="2-13" cx="1674" cy="310" r="62"></circle>
+      <circle data-channels="186" id="0-11" cx="1426" cy="62" r="62"></circle>
+      <circle data-channels="187" id="1-10" cx="1302" cy="186" r="62"></circle>
+      <circle data-channels="188" id="3-14" cx="1798" cy="434" r="62"></circle>
+      <circle data-channels="189" id="3-15" transform="translate(1922.000000, 434.000000) rotate(90.000000) translate(-1922.000000, -434.000000) " cx="1922" cy="434" r="62"></circle>
+      <circle data-channels="190" id="3-16" transform="translate(2046.000000, 434.000000) rotate(90.000000) translate(-2046.000000, -434.000000) " cx="2046" cy="434" r="62"></circle>
+      <circle data-channels="191" id="2-16" transform="translate(2046.000000, 310.000000) rotate(90.000000) translate(-2046.000000, -310.000000) " cx="2046" cy="310" r="62"></circle>
+      <circle data-channels="192" id="1-16" transform="translate(2046.000000, 186.000000) rotate(90.000000) translate(-2046.000000, -186.000000) " cx="2046" cy="186" r="62"></circle>
+      <circle data-channels="193" id="1-17" transform="translate(2170.000000, 186.000000) rotate(90.000000) translate(-2170.000000, -186.000000) " cx="2170" cy="186" r="62"></circle>
+      <circle data-channels="194" id="1-18" transform="translate(2294.000000, 186.000000) rotate(90.000000) translate(-2294.000000, -186.000000) " cx="2294" cy="186" r="62"></circle>
+      <circle data-channels="195" id="2-18" transform="translate(2294.000000, 310.000000) rotate(90.000000) translate(-2294.000000, -310.000000) " cx="2294" cy="310" r="62"></circle>
+      <circle data-channels="196" id="3-18" transform="translate(2294.000000, 434.000000) rotate(90.000000) translate(-2294.000000, -434.000000) " cx="2294" cy="434" r="62"></circle>
+      <circle data-channels="197" id="3-17" transform="translate(2170.000000, 434.000000) rotate(90.000000) translate(-2170.000000, -434.000000) " cx="2170" cy="434" r="62"></circle>
+      <circle data-channels="198" id="1-19" transform="translate(2418.000000, 186.000000) rotate(90.000000) translate(-2418.000000, -186.000000) " cx="2418" cy="186" r="62"></circle>
+      <circle data-channels="199" id="0-18" transform="translate(2294.000000, 62.000000) rotate(90.000000) translate(-2294.000000, -62.000000) " cx="2294" cy="62" r="62"></circle>
+      <circle data-channels="200" id="4-16" transform="translate(2046.000000, 558.000000) rotate(90.000000) translate(-2046.000000, -558.000000) " cx="2046" cy="558" r="62"></circle>
+  </g>
+</svg>

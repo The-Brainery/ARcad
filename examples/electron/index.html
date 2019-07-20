@@ -13,11 +13,11 @@
         // Override css hooks (load these files using <link> tags instead)
         return undefined;
       });
-      
+
       const fs = require('fs');
       const ARcad = require('../../src/ARcad.js');
 
-      const svgFile = fs.readFileSync('../default.svg').toString();
+      const svgFile = fs.readFileSync('FerrobotLarge.svg').toString();
 
       let svgContainer = document.querySelector("#svgContainer");
       svgContainer.innerHTML = svgFile;

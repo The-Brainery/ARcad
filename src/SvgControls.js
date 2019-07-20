@@ -134,7 +134,6 @@ class SvgControls {
 
     ray = Ray(x1,y1,x2,y2);
     collisions = this.castRay(ray, fluxel);
-
     let closest = _.sortBy(collisions, "distance")[0];
     return closest;
   }
@@ -149,8 +148,8 @@ class SvgControls {
     if (e.code == "ArrowLeft") closest = this.getClosestCollision(fluxel, "L");
     if (e.code == "ArrowRight") closest = this.getClosestCollision(fluxel, "R");
 
-    fluxel.active = false;
     if (closest.distance > this.neighbourDistance) return;
+    fluxel.active = false;
     if (this.fluxelsInverted != true) {
       closest.fluxel.selected = true;
       closest.fluxel.active = true;
@@ -171,7 +170,6 @@ class SvgControls {
       fluxel.active = true;
       closest.fluxel.selected = true;
       closest.fluxel.active = false;
-
       // Turn off all after given duration
       setTimeout(() => {
         let selected = _.find(this.fluxels, "selected");

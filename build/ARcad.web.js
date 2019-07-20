@@ -120,7 +120,7 @@ exports.Matrix2D = __webpack_require__(37);
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.17.11';
+  var VERSION = '4.17.10';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -384,7 +384,7 @@ exports.Matrix2D = __webpack_require__(37);
   var reHasUnicode = RegExp('[' + rsZWJ + rsAstralRange  + rsComboRange + rsVarRange + ']');
 
   /** Used to detect strings that need a more robust regexp to match words. */
-  var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
+  var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2,}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
 
   /** Used to assign default `context` object properties. */
   var contextProps = [
@@ -1330,6 +1330,20 @@ exports.Matrix2D = __webpack_require__(37);
       }
     }
     return result;
+  }
+
+  /**
+   * Gets the value at `key`, unless `key` is "__proto__".
+   *
+   * @private
+   * @param {Object} object The object to query.
+   * @param {string} key The key of the property to get.
+   * @returns {*} Returns the property value.
+   */
+  function safeGet(object, key) {
+    return key == '__proto__'
+      ? undefined
+      : object[key];
   }
 
   /**
@@ -3789,7 +3803,7 @@ exports.Matrix2D = __webpack_require__(37);
           if (isArguments(objValue)) {
             newValue = toPlainObject(objValue);
           }
-          else if (!isObject(objValue) || isFunction(objValue)) {
+          else if (!isObject(objValue) || (srcIndex && isFunction(objValue))) {
             newValue = initCloneObject(srcValue);
           }
         }
@@ -6710,22 +6724,6 @@ exports.Matrix2D = __webpack_require__(37);
         array[length] = isIndex(index, arrLength) ? oldArray[index] : undefined;
       }
       return array;
-    }
-
-    /**
-     * Gets the value at `key`, unless `key` is "__proto__".
-     *
-     * @private
-     * @param {Object} object The object to query.
-     * @param {string} key The key of the property to get.
-     * @returns {*} Returns the property value.
-     */
-    function safeGet(object, key) {
-      if (key == '__proto__') {
-        return;
-      }
-
-      return object[key];
     }
 
     /**
@@ -17789,9 +17787,9 @@ module.exports = function(module) {
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global) {var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Backbone.js 1.4.0
+/* WEBPACK VAR INJECTION */(function(global) {var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Backbone.js 1.3.3
 
-//     (c) 2010-2019 Jeremy Ashkenas and DocumentCloud
+//     (c) 2010-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Backbone may be freely distributed under the MIT license.
 //     For all details and documentation:
 //     http://backbonejs.org
@@ -17800,8 +17798,8 @@ module.exports = function(module) {
 
   // Establish the root object, `window` (`self`) in the browser, or `global` on the server.
   // We use `self` instead of `window` for `WebWorker` support.
-  var root = typeof self == 'object' && self.self === self && self ||
-            typeof global == 'object' && global.global === global && global;
+  var root = (typeof self == 'object' && self.self === self && self) ||
+            (typeof global == 'object' && global.global === global && global);
 
   // Set up Backbone appropriately for the environment. Start with AMD.
   if (true) {
@@ -17820,7 +17818,7 @@ module.exports = function(module) {
 
   // Finally, as a browser global.
   } else {
-    root.Backbone = factory(root, {}, root._, root.jQuery || root.Zepto || root.ender || root.$);
+    root.Backbone = factory(root, {}, root._, (root.jQuery || root.Zepto || root.ender || root.$));
   }
 
 })(function(root, Backbone, _, $) {
@@ -17836,7 +17834,7 @@ module.exports = function(module) {
   var slice = Array.prototype.slice;
 
   // Current version of the library. Keep in sync with `package.json`.
-  Backbone.VERSION = '1.4.0';
+  Backbone.VERSION = '1.3.3';
 
   // For Backbone's purposes, jQuery, Zepto, Ender, or My Library (kidding) owns
   // the `$` variable.
@@ -17860,6 +17858,54 @@ module.exports = function(module) {
   // form param named `model`.
   Backbone.emulateJSON = false;
 
+  // Proxy Backbone class methods to Underscore functions, wrapping the model's
+  // `attributes` object or collection's `models` array behind the scenes.
+  //
+  // collection.filter(function(model) { return model.get('age') > 10 });
+  // collection.each(this.addView);
+  //
+  // `Function#apply` can be slow so we use the method's arg count, if we know it.
+  var addMethod = function(length, method, attribute) {
+    switch (length) {
+      case 1: return function() {
+        return _[method](this[attribute]);
+      };
+      case 2: return function(value) {
+        return _[method](this[attribute], value);
+      };
+      case 3: return function(iteratee, context) {
+        return _[method](this[attribute], cb(iteratee, this), context);
+      };
+      case 4: return function(iteratee, defaultVal, context) {
+        return _[method](this[attribute], cb(iteratee, this), defaultVal, context);
+      };
+      default: return function() {
+        var args = slice.call(arguments);
+        args.unshift(this[attribute]);
+        return _[method].apply(_, args);
+      };
+    }
+  };
+  var addUnderscoreMethods = function(Class, methods, attribute) {
+    _.each(methods, function(length, method) {
+      if (_[method]) Class.prototype[method] = addMethod(length, method, attribute);
+    });
+  };
+
+  // Support `collection.sortBy('attr')` and `collection.findWhere({id: 1})`.
+  var cb = function(iteratee, instance) {
+    if (_.isFunction(iteratee)) return iteratee;
+    if (_.isObject(iteratee) && !instance._isModel(iteratee)) return modelMatcher(iteratee);
+    if (_.isString(iteratee)) return function(model) { return model.get(iteratee); };
+    return iteratee;
+  };
+  var modelMatcher = function(attrs) {
+    var matcher = _.matches(attrs);
+    return function(model) {
+      return matcher(model.attributes);
+    };
+  };
+
   // Backbone.Events
   // ---------------
 
@@ -17877,9 +17923,6 @@ module.exports = function(module) {
 
   // Regular expression used to split event strings.
   var eventSplitter = /\s+/;
-
-  // A private global variable to share between listeners and listenees.
-  var _listening;
 
   // Iterates over the standard `event, callback` (as well as the fancy multiple
   // space-separated events `"change blur", callback` and jQuery-style event
@@ -17907,21 +17950,23 @@ module.exports = function(module) {
   // Bind an event to a `callback` function. Passing `"all"` will bind
   // the callback to all events fired.
   Events.on = function(name, callback, context) {
-    this._events = eventsApi(onApi, this._events || {}, name, callback, {
+    return internalOn(this, name, callback, context);
+  };
+
+  // Guard the `listening` argument from the public API.
+  var internalOn = function(obj, name, callback, context, listening) {
+    obj._events = eventsApi(onApi, obj._events || {}, name, callback, {
       context: context,
-      ctx: this,
-      listening: _listening
+      ctx: obj,
+      listening: listening
     });
 
-    if (_listening) {
-      var listeners = this._listeners || (this._listeners = {});
-      listeners[_listening.id] = _listening;
-      // Allow the listening to use a counter, instead of tracking
-      // callbacks for library interop
-      _listening.interop = false;
+    if (listening) {
+      var listeners = obj._listeners || (obj._listeners = {});
+      listeners[listening.id] = listening;
     }
 
-    return this;
+    return obj;
   };
 
   // Inversion-of-control versions of `on`. Tell *this* object to listen to
@@ -17931,23 +17976,17 @@ module.exports = function(module) {
     if (!obj) return this;
     var id = obj._listenId || (obj._listenId = _.uniqueId('l'));
     var listeningTo = this._listeningTo || (this._listeningTo = {});
-    var listening = _listening = listeningTo[id];
+    var listening = listeningTo[id];
 
     // This object is not listening to any other events on `obj` yet.
     // Setup the necessary references to track the listening callbacks.
     if (!listening) {
-      this._listenId || (this._listenId = _.uniqueId('l'));
-      listening = _listening = listeningTo[id] = new Listening(this, obj);
+      var thisId = this._listenId || (this._listenId = _.uniqueId('l'));
+      listening = listeningTo[id] = {obj: obj, objId: id, id: thisId, listeningTo: listeningTo, count: 0};
     }
 
-    // Bind callbacks on obj.
-    var error = tryCatchOn(obj, name, callback, this);
-    _listening = void 0;
-
-    if (error) throw error;
-    // If the target obj is not Backbone.Events, track events manually.
-    if (listening.interop) listening.on(name, callback);
-
+    // Bind callbacks on obj, and keep track of them on listening.
+    internalOn(obj, name, callback, this, listening);
     return this;
   };
 
@@ -17963,16 +18002,6 @@ module.exports = function(module) {
     return events;
   };
 
-  // An try-catch guarded #on function, to prevent poisoning the global
-  // `_listening` variable.
-  var tryCatchOn = function(obj, name, callback, context) {
-    try {
-      obj.on(name, callback, context);
-    } catch (e) {
-      return e;
-    }
-  };
-
   // Remove one or many callbacks. If `context` is null, removes all
   // callbacks with that function. If `callback` is null, removes all
   // callbacks for the event. If `name` is null, removes all bound
@@ -17983,7 +18012,6 @@ module.exports = function(module) {
       context: context,
       listeners: this._listeners
     });
-
     return this;
   };
 
@@ -17994,6 +18022,7 @@ module.exports = function(module) {
     if (!listeningTo) return this;
 
     var ids = obj ? [obj._listenId] : _.keys(listeningTo);
+
     for (var i = 0; i < ids.length; i++) {
       var listening = listeningTo[ids[i]];
 
@@ -18002,9 +18031,7 @@ module.exports = function(module) {
       if (!listening) break;
 
       listening.obj.off(name, callback, this);
-      if (listening.interop) listening.off(name, callback);
     }
-    if (_.isEmpty(listeningTo)) this._listeningTo = void 0;
 
     return this;
   };
@@ -18013,18 +18040,21 @@ module.exports = function(module) {
   var offApi = function(events, name, callback, options) {
     if (!events) return;
 
+    var i = 0, listening;
     var context = options.context, listeners = options.listeners;
-    var i = 0, names;
 
-    // Delete all event listeners and "drop" events.
-    if (!name && !context && !callback) {
-      for (names = _.keys(listeners); i < names.length; i++) {
-        listeners[names[i]].cleanup();
+    // Delete all events listeners and "drop" events.
+    if (!name && !callback && !context) {
+      var ids = _.keys(listeners);
+      for (; i < ids.length; i++) {
+        listening = listeners[ids[i]];
+        delete listeners[listening.id];
+        delete listening.listeningTo[listening.objId];
       }
       return;
     }
 
-    names = name ? [name] : _.keys(events);
+    var names = name ? [name] : _.keys(events);
     for (; i < names.length; i++) {
       name = names[i];
       var handlers = events[name];
@@ -18032,7 +18062,7 @@ module.exports = function(module) {
       // Bail out if there are no events stored.
       if (!handlers) break;
 
-      // Find any remaining events.
+      // Replace events if there are any remaining.  Otherwise, clean up.
       var remaining = [];
       for (var j = 0; j < handlers.length; j++) {
         var handler = handlers[j];
@@ -18043,19 +18073,21 @@ module.exports = function(module) {
         ) {
           remaining.push(handler);
         } else {
-          var listening = handler.listening;
-          if (listening) listening.off(name, callback);
+          listening = handler.listening;
+          if (listening && --listening.count === 0) {
+            delete listeners[listening.id];
+            delete listening.listeningTo[listening.objId];
+          }
         }
       }
 
-      // Replace events if there are any remaining.  Otherwise, clean up.
+      // Update tail event if the list has any events.  Otherwise, clean up.
       if (remaining.length) {
         events[name] = remaining;
       } else {
         delete events[name];
       }
     }
-
     return events;
   };
 
@@ -18065,7 +18097,7 @@ module.exports = function(module) {
   // once for each event, not once for a combination of all events.
   Events.once = function(name, callback, context) {
     // Map the event into a `{event: once}` object.
-    var events = eventsApi(onceMap, {}, name, callback, this.off.bind(this));
+    var events = eventsApi(onceMap, {}, name, callback, _.bind(this.off, this));
     if (typeof name === 'string' && context == null) callback = void 0;
     return this.on(events, callback, context);
   };
@@ -18073,7 +18105,7 @@ module.exports = function(module) {
   // Inversion-of-control versions of `once`.
   Events.listenToOnce = function(obj, name, callback) {
     // Map the event into a `{event: once}` object.
-    var events = eventsApi(onceMap, {}, name, callback, this.stopListening.bind(this, obj));
+    var events = eventsApi(onceMap, {}, name, callback, _.bind(this.stopListening, this, obj));
     return this.listenTo(obj, events);
   };
 
@@ -18131,44 +18163,6 @@ module.exports = function(module) {
     }
   };
 
-  // A listening class that tracks and cleans up memory bindings
-  // when all callbacks have been offed.
-  var Listening = function(listener, obj) {
-    this.id = listener._listenId;
-    this.listener = listener;
-    this.obj = obj;
-    this.interop = true;
-    this.count = 0;
-    this._events = void 0;
-  };
-
-  Listening.prototype.on = Events.on;
-
-  // Offs a callback (or several).
-  // Uses an optimized counter if the listenee uses Backbone.Events.
-  // Otherwise, falls back to manual tracking to support events
-  // library interop.
-  Listening.prototype.off = function(name, callback) {
-    var cleanup;
-    if (this.interop) {
-      this._events = eventsApi(offApi, this._events, name, callback, {
-        context: void 0,
-        listeners: void 0
-      });
-      cleanup = !this._events;
-    } else {
-      this.count--;
-      cleanup = this.count === 0;
-    }
-    if (cleanup) this.cleanup();
-  };
-
-  // Cleans up memory bindings between the listener and the listenee.
-  Listening.prototype.cleanup = function() {
-    delete this.listener._listeningTo[this.obj._listenId];
-    if (!this.interop) delete this.obj._listeners[this.id];
-  };
-
   // Aliases for backwards compatibility.
   Events.bind   = Events.on;
   Events.unbind = Events.off;
@@ -18190,7 +18184,6 @@ module.exports = function(module) {
   var Model = Backbone.Model = function(attributes, options) {
     var attrs = attributes || {};
     options || (options = {});
-    this.preinitialize.apply(this, arguments);
     this.cid = _.uniqueId(this.cidPrefix);
     this.attributes = {};
     if (options.collection) this.collection = options.collection;
@@ -18218,10 +18211,6 @@ module.exports = function(module) {
     // The prefix is used to create the client id which is used to identify models locally.
     // You may want to override this if you're experiencing name clashes with model ids.
     cidPrefix: 'c',
-
-    // preinitialize is an empty function by default. You can override it with a function
-    // or object.  preinitialize will run before any instantiation logic is run in the Model.
-    preinitialize: function(){},
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
@@ -18363,14 +18352,12 @@ module.exports = function(module) {
       if (!diff) return this.hasChanged() ? _.clone(this.changed) : false;
       var old = this._changing ? this._previousAttributes : this.attributes;
       var changed = {};
-      var hasChanged;
       for (var attr in diff) {
         var val = diff[attr];
         if (_.isEqual(old[attr], val)) continue;
         changed[attr] = val;
-        hasChanged = true;
       }
-      return hasChanged ? changed : false;
+      return _.size(changed) ? changed : false;
     },
 
     // Get the previous value of an attribute, recorded at the time the last
@@ -18446,7 +18433,7 @@ module.exports = function(module) {
       // Set temporary attributes if `{wait: true}` to properly find new ids.
       if (attrs && wait) this.attributes = _.extend({}, attributes, attrs);
 
-      var method = this.isNew() ? 'create' : options.patch ? 'patch' : 'update';
+      var method = this.isNew() ? 'create' : (options.patch ? 'patch' : 'update');
       if (method === 'patch' && !options.attrs) options.attrs = attrs;
       var xhr = this.sync(method, this, options);
 
@@ -18534,6 +18521,14 @@ module.exports = function(module) {
 
   });
 
+  // Underscore methods that we want to implement on the Model, mapped to the
+  // number of arguments they take.
+  var modelMethods = {keys: 1, values: 1, pairs: 1, invert: 1, pick: 0,
+      omit: 0, chain: 1, isEmpty: 1};
+
+  // Mix in each Underscore method as a proxy to `Model#attributes`.
+  addUnderscoreMethods(Model, modelMethods, 'attributes');
+
   // Backbone.Collection
   // -------------------
 
@@ -18549,7 +18544,6 @@ module.exports = function(module) {
   // its models in sort order, as they're added and removed.
   var Collection = Backbone.Collection = function(models, options) {
     options || (options = {});
-    this.preinitialize.apply(this, arguments);
     if (options.model) this.model = options.model;
     if (options.comparator !== void 0) this.comparator = options.comparator;
     this._reset();
@@ -18578,11 +18572,6 @@ module.exports = function(module) {
     // The default model for a collection is just a **Backbone.Model**.
     // This should be overridden in most cases.
     model: Model,
-
-
-    // preinitialize is an empty function by default. You can override it with a function
-    // or object.  preinitialize will run before any instantiation logic is run in the Collection.
-    preinitialize: function(){},
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
@@ -18786,7 +18775,7 @@ module.exports = function(module) {
     get: function(obj) {
       if (obj == null) return void 0;
       return this._byId[obj] ||
-        this._byId[this.modelId(this._isModel(obj) ? obj.attributes : obj)] ||
+        this._byId[this.modelId(obj.attributes || obj)] ||
         obj.cid && this._byId[obj.cid];
     },
 
@@ -18822,7 +18811,7 @@ module.exports = function(module) {
       options || (options = {});
 
       var length = comparator.length;
-      if (_.isFunction(comparator)) comparator = comparator.bind(this);
+      if (_.isFunction(comparator)) comparator = _.bind(comparator, this);
 
       // Run sort based on type of `comparator`.
       if (length === 1 || _.isString(comparator)) {
@@ -18892,21 +18881,6 @@ module.exports = function(module) {
     // Define how to uniquely identify models in the collection.
     modelId: function(attrs) {
       return attrs[this.model.prototype.idAttribute || 'id'];
-    },
-
-    // Get an iterator of all models in this collection.
-    values: function() {
-      return new CollectionIterator(this, ITERATOR_VALUES);
-    },
-
-    // Get an iterator of all model IDs in this collection.
-    keys: function() {
-      return new CollectionIterator(this, ITERATOR_KEYS);
-    },
-
-    // Get an iterator of all [ID, model] tuples in this collection.
-    entries: function() {
-      return new CollectionIterator(this, ITERATOR_KEYSVALUES);
     },
 
     // Private method to reset all internal state. Called when the collection
@@ -19005,71 +18979,20 @@ module.exports = function(module) {
 
   });
 
-  // Defining an @@iterator method implements JavaScript's Iterable protocol.
-  // In modern ES2015 browsers, this value is found at Symbol.iterator.
-  /* global Symbol */
-  var $$iterator = typeof Symbol === 'function' && Symbol.iterator;
-  if ($$iterator) {
-    Collection.prototype[$$iterator] = Collection.prototype.values;
-  }
+  // Underscore methods that we want to implement on the Collection.
+  // 90% of the core usefulness of Backbone Collections is actually implemented
+  // right here:
+  var collectionMethods = {forEach: 3, each: 3, map: 3, collect: 3, reduce: 0,
+      foldl: 0, inject: 0, reduceRight: 0, foldr: 0, find: 3, detect: 3, filter: 3,
+      select: 3, reject: 3, every: 3, all: 3, some: 3, any: 3, include: 3, includes: 3,
+      contains: 3, invoke: 0, max: 3, min: 3, toArray: 1, size: 1, first: 3,
+      head: 3, take: 3, initial: 3, rest: 3, tail: 3, drop: 3, last: 3,
+      without: 0, difference: 0, indexOf: 3, shuffle: 1, lastIndexOf: 3,
+      isEmpty: 1, chain: 1, sample: 3, partition: 3, groupBy: 3, countBy: 3,
+      sortBy: 3, indexBy: 3, findIndex: 3, findLastIndex: 3};
 
-  // CollectionIterator
-  // ------------------
-
-  // A CollectionIterator implements JavaScript's Iterator protocol, allowing the
-  // use of `for of` loops in modern browsers and interoperation between
-  // Backbone.Collection and other JavaScript functions and third-party libraries
-  // which can operate on Iterables.
-  var CollectionIterator = function(collection, kind) {
-    this._collection = collection;
-    this._kind = kind;
-    this._index = 0;
-  };
-
-  // This "enum" defines the three possible kinds of values which can be emitted
-  // by a CollectionIterator that correspond to the values(), keys() and entries()
-  // methods on Collection, respectively.
-  var ITERATOR_VALUES = 1;
-  var ITERATOR_KEYS = 2;
-  var ITERATOR_KEYSVALUES = 3;
-
-  // All Iterators should themselves be Iterable.
-  if ($$iterator) {
-    CollectionIterator.prototype[$$iterator] = function() {
-      return this;
-    };
-  }
-
-  CollectionIterator.prototype.next = function() {
-    if (this._collection) {
-
-      // Only continue iterating if the iterated collection is long enough.
-      if (this._index < this._collection.length) {
-        var model = this._collection.at(this._index);
-        this._index++;
-
-        // Construct a value depending on what kind of values should be iterated.
-        var value;
-        if (this._kind === ITERATOR_VALUES) {
-          value = model;
-        } else {
-          var id = this._collection.modelId(model.attributes);
-          if (this._kind === ITERATOR_KEYS) {
-            value = id;
-          } else { // ITERATOR_KEYSVALUES
-            value = [id, model];
-          }
-        }
-        return {value: value, done: false};
-      }
-
-      // Once exhausted, remove the reference to the collection so future
-      // calls to the next method always return done.
-      this._collection = void 0;
-    }
-
-    return {value: void 0, done: true};
-  };
+  // Mix in each Underscore method as a proxy to `Collection#models`.
+  addUnderscoreMethods(Collection, collectionMethods, 'models');
 
   // Backbone.View
   // -------------
@@ -19086,7 +19009,6 @@ module.exports = function(module) {
   // if an existing element is not provided...
   var View = Backbone.View = function(options) {
     this.cid = _.uniqueId('view');
-    this.preinitialize.apply(this, arguments);
     _.extend(this, _.pick(options, viewOptions));
     this._ensureElement();
     this.initialize.apply(this, arguments);
@@ -19109,10 +19031,6 @@ module.exports = function(module) {
     $: function(selector) {
       return this.$el.find(selector);
     },
-
-    // preinitialize is an empty function by default. You can override it with a function
-    // or object.  preinitialize will run before any instantiation logic is run in the View
-    preinitialize: function(){},
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
@@ -19181,7 +19099,7 @@ module.exports = function(module) {
         if (!_.isFunction(method)) method = this[method];
         if (!method) continue;
         var match = key.match(delegateEventSplitter);
-        this.delegate(match[1], match[2], method.bind(this));
+        this.delegate(match[1], match[2], _.bind(method, this));
       }
       return this;
     },
@@ -19237,94 +19155,6 @@ module.exports = function(module) {
       this.$el.attr(attributes);
     }
 
-  });
-
-  // Proxy Backbone class methods to Underscore functions, wrapping the model's
-  // `attributes` object or collection's `models` array behind the scenes.
-  //
-  // collection.filter(function(model) { return model.get('age') > 10 });
-  // collection.each(this.addView);
-  //
-  // `Function#apply` can be slow so we use the method's arg count, if we know it.
-  var addMethod = function(base, length, method, attribute) {
-    switch (length) {
-      case 1: return function() {
-        return base[method](this[attribute]);
-      };
-      case 2: return function(value) {
-        return base[method](this[attribute], value);
-      };
-      case 3: return function(iteratee, context) {
-        return base[method](this[attribute], cb(iteratee, this), context);
-      };
-      case 4: return function(iteratee, defaultVal, context) {
-        return base[method](this[attribute], cb(iteratee, this), defaultVal, context);
-      };
-      default: return function() {
-        var args = slice.call(arguments);
-        args.unshift(this[attribute]);
-        return base[method].apply(base, args);
-      };
-    }
-  };
-
-  var addUnderscoreMethods = function(Class, base, methods, attribute) {
-    _.each(methods, function(length, method) {
-      if (base[method]) Class.prototype[method] = addMethod(base, length, method, attribute);
-    });
-  };
-
-  // Support `collection.sortBy('attr')` and `collection.findWhere({id: 1})`.
-  var cb = function(iteratee, instance) {
-    if (_.isFunction(iteratee)) return iteratee;
-    if (_.isObject(iteratee) && !instance._isModel(iteratee)) return modelMatcher(iteratee);
-    if (_.isString(iteratee)) return function(model) { return model.get(iteratee); };
-    return iteratee;
-  };
-  var modelMatcher = function(attrs) {
-    var matcher = _.matches(attrs);
-    return function(model) {
-      return matcher(model.attributes);
-    };
-  };
-
-  // Underscore methods that we want to implement on the Collection.
-  // 90% of the core usefulness of Backbone Collections is actually implemented
-  // right here:
-  var collectionMethods = {forEach: 3, each: 3, map: 3, collect: 3, reduce: 0,
-    foldl: 0, inject: 0, reduceRight: 0, foldr: 0, find: 3, detect: 3, filter: 3,
-    select: 3, reject: 3, every: 3, all: 3, some: 3, any: 3, include: 3, includes: 3,
-    contains: 3, invoke: 0, max: 3, min: 3, toArray: 1, size: 1, first: 3,
-    head: 3, take: 3, initial: 3, rest: 3, tail: 3, drop: 3, last: 3,
-    without: 0, difference: 0, indexOf: 3, shuffle: 1, lastIndexOf: 3,
-    isEmpty: 1, chain: 1, sample: 3, partition: 3, groupBy: 3, countBy: 3,
-    sortBy: 3, indexBy: 3, findIndex: 3, findLastIndex: 3};
-
-
-  // Underscore methods that we want to implement on the Model, mapped to the
-  // number of arguments they take.
-  var modelMethods = {keys: 1, values: 1, pairs: 1, invert: 1, pick: 0,
-    omit: 0, chain: 1, isEmpty: 1};
-
-  // Mix in each Underscore method as a proxy to `Collection#models`.
-
-  _.each([
-    [Collection, collectionMethods, 'models'],
-    [Model, modelMethods, 'attributes']
-  ], function(config) {
-    var Base = config[0],
-        methods = config[1],
-        attribute = config[2];
-
-    Base.mixin = function(obj) {
-      var mappings = _.reduce(_.functions(obj), function(memo, name) {
-        memo[name] = 0;
-        return memo;
-      }, {});
-      addUnderscoreMethods(Base, obj, mappings, attribute);
-    };
-
-    addUnderscoreMethods(Base, _, methods, attribute);
   });
 
   // Backbone.sync
@@ -19407,11 +19237,11 @@ module.exports = function(module) {
 
   // Map from CRUD to HTTP for our default `Backbone.sync` implementation.
   var methodMap = {
-    create: 'POST',
-    update: 'PUT',
-    patch: 'PATCH',
-    delete: 'DELETE',
-    read: 'GET'
+    'create': 'POST',
+    'update': 'PUT',
+    'patch': 'PATCH',
+    'delete': 'DELETE',
+    'read': 'GET'
   };
 
   // Set the default implementation of `Backbone.ajax` to proxy through to `$`.
@@ -19427,7 +19257,6 @@ module.exports = function(module) {
   // matched. Creating a new one sets its `routes` hash, if not set statically.
   var Router = Backbone.Router = function(options) {
     options || (options = {});
-    this.preinitialize.apply(this, arguments);
     if (options.routes) this.routes = options.routes;
     this._bindRoutes();
     this.initialize.apply(this, arguments);
@@ -19442,10 +19271,6 @@ module.exports = function(module) {
 
   // Set up all inheritable **Backbone.Router** properties and methods.
   _.extend(Router.prototype, Events, {
-
-    // preinitialize is an empty function by default. You can override it with a function
-    // or object.  preinitialize will run before any instantiation logic is run in the Router.
-    preinitialize: function(){},
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
@@ -19504,11 +19329,11 @@ module.exports = function(module) {
     // against the current location hash.
     _routeToRegExp: function(route) {
       route = route.replace(escapeRegExp, '\\$&')
-        .replace(optionalParam, '(?:$1)?')
-        .replace(namedParam, function(match, optional) {
-          return optional ? match : '([^/?]+)';
-        })
-        .replace(splatParam, '([^?]*?)');
+                   .replace(optionalParam, '(?:$1)?')
+                   .replace(namedParam, function(match, optional) {
+                     return optional ? match : '([^/?]+)';
+                   })
+                   .replace(splatParam, '([^?]*?)');
       return new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$');
     },
 
@@ -19536,7 +19361,7 @@ module.exports = function(module) {
   // falls back to polling.
   var History = Backbone.History = function() {
     this.handlers = [];
-    this.checkUrl = this.checkUrl.bind(this);
+    this.checkUrl = _.bind(this.checkUrl, this);
 
     // Ensure that `History` can be used outside of the browser.
     if (typeof window !== 'undefined') {
@@ -19777,14 +19602,11 @@ module.exports = function(module) {
       }
       var url = rootPath + fragment;
 
-      // Strip the fragment of the query and hash for matching.
-      fragment = fragment.replace(pathStripper, '');
+      // Strip the hash and decode for matching.
+      fragment = this.decodeFragment(fragment.replace(pathStripper, ''));
 
-      // Decode for matching.
-      var decodedFragment = this.decodeFragment(fragment);
-
-      if (this.fragment === decodedFragment) return;
-      this.fragment = decodedFragment;
+      if (this.fragment === fragment) return;
+      this.fragment = fragment;
 
       // If pushState is available, we use it to set the fragment as a real URL.
       if (this._usePushState) {
@@ -22142,7 +21964,6 @@ const CreateGUI = (arcad, svgDOM) => {
       return this._strokeWidth;
     },
     set strokeWidth(_strokeWidth) {
-      console.log("Setting stroke width!");
       _.set(arcad, "svgControls.strokeWidth", _strokeWidth);
       localStorage.setItem("stroke-width", _strokeWidth);
       this._strokeWidth = _strokeWidth;
@@ -24535,7 +24356,6 @@ var GUI = function GUI(pars) {
   }
   var useLocalStorage = SUPPORTS_LOCAL_STORAGE && localStorage.getItem(getLocalStorageHash(this, 'isLocal')) === 'true';
   var saveToLocalStorage = void 0;
-  var titleRow = void 0;
   Object.defineProperties(this,
   {
     parent: {
@@ -24590,8 +24410,8 @@ var GUI = function GUI(pars) {
       },
       set: function set$$1(v) {
         params.name = v;
-        if (titleRow) {
-          titleRow.innerHTML = params.name;
+        if (titleRowName) {
+          titleRowName.innerHTML = params.name;
         }
       }
     },
@@ -24635,7 +24455,7 @@ var GUI = function GUI(pars) {
     }
   });
   if (Common.isUndefined(params.parent)) {
-    this.closed = params.closed || false;
+    params.closed = false;
     dom.addClass(this.domElement, GUI.CLASS_MAIN);
     dom.makeSelectable(this.domElement, false);
     if (SUPPORTS_LOCAL_STORAGE) {
@@ -24664,9 +24484,9 @@ var GUI = function GUI(pars) {
     if (params.closed === undefined) {
       params.closed = true;
     }
-    var titleRowName = document.createTextNode(params.name);
-    dom.addClass(titleRowName, 'controller-name');
-    titleRow = addRow(_this, titleRowName);
+    var _titleRowName = document.createTextNode(params.name);
+    dom.addClass(_titleRowName, 'controller-name');
+    var titleRow = addRow(_this, _titleRowName);
     var onClickTitle = function onClickTitle(e) {
       e.preventDefault();
       _this.closed = !_this.closed;
@@ -25013,7 +24833,7 @@ function augmentController(gui, li, controller) {
   });
   if (controller instanceof NumberControllerSlider) {
     var box = new NumberControllerBox(controller.object, controller.property, { min: controller.__min, max: controller.__max, step: controller.__step });
-    Common.each(['updateDisplay', 'onChange', 'onFinishChange', 'step', 'min', 'max'], function (method) {
+    Common.each(['updateDisplay', 'onChange', 'onFinishChange', 'step'], function (method) {
       var pc = controller[method];
       var pb = box[method];
       controller[method] = box[method] = function () {
@@ -25541,9 +25361,7 @@ module.exports = function (h, opts) {
           } else {
             p.push([ OPEN, arg ])
           }
-        } else if (xstate === COMMENT && opts.comments) {
-          reg += String(arg)
-        } else if (xstate !== COMMENT) {
+        } else {
           p.push([ VAR, xstate, arg ])
         }
         parts.push.apply(parts, p)
@@ -25643,7 +25461,6 @@ module.exports = function (h, opts) {
 
     if (tree[2].length > 2
     || (tree[2].length === 2 && /\S/.test(tree[2][1]))) {
-      if (opts.createFragment) return opts.createFragment(tree[2])
       throw new Error(
         'multiple root elements must be wrapped in an enclosing tag'
       )
@@ -25676,7 +25493,7 @@ module.exports = function (h, opts) {
           state = TEXT
         } else if (state === COMMENT && /-$/.test(reg) && c === '-') {
           if (opts.comments) {
-            res.push([ATTR_VALUE,reg.substr(0, reg.length - 1)])
+            res.push([ATTR_VALUE,reg.substr(0, reg.length - 1)],[CLOSE])
           }
           reg = ''
           state = TEXT
@@ -25771,7 +25588,6 @@ module.exports = function (h, opts) {
     if (typeof x === 'function') return x
     else if (typeof x === 'string') return x
     else if (x && typeof x === 'object') return x
-    else if (x === null || x === undefined) return x
     else return concat('', x)
   }
 }
@@ -25779,6 +25595,9 @@ module.exports = function (h, opts) {
 function quot (state) {
   return state === ATTR_VALUE_SQ || state === ATTR_VALUE_DQ
 }
+
+var hasOwn = Object.prototype.hasOwnProperty
+function has (obj, key) { return hasOwn.call(obj, key) }
 
 var closeRE = RegExp('^(' + [
   'area', 'base', 'basefont', 'bgsound', 'br', 'col', 'command', 'embed',
@@ -25982,83 +25801,45 @@ function assert (t, m) {
 
 /***/ }),
 /* 28 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-function morphAttrs(fromNode, toNode) {
-    var attrs = toNode.attributes;
-    var i;
-    var attr;
-    var attrName;
-    var attrNamespaceURI;
-    var attrValue;
-    var fromValue;
 
-    // update attributes on original DOM element
-    for (i = attrs.length - 1; i >= 0; --i) {
-        attr = attrs[i];
-        attrName = attr.name;
-        attrNamespaceURI = attr.namespaceURI;
-        attrValue = attr.value;
-
-        if (attrNamespaceURI) {
-            attrName = attr.localName || attrName;
-            fromValue = fromNode.getAttributeNS(attrNamespaceURI, attrName);
-
-            if (fromValue !== attrValue) {
-                fromNode.setAttributeNS(attrNamespaceURI, attrName, attrValue);
-            }
-        } else {
-            fromValue = fromNode.getAttribute(attrName);
-
-            if (fromValue !== attrValue) {
-                fromNode.setAttribute(attrName, attrValue);
-            }
-        }
-    }
-
-    // Remove any extra attributes found on the original DOM element that
-    // weren't found on the target element.
-    attrs = fromNode.attributes;
-
-    for (i = attrs.length - 1; i >= 0; --i) {
-        attr = attrs[i];
-        if (attr.specified !== false) {
-            attrName = attr.name;
-            attrNamespaceURI = attr.namespaceURI;
-
-            if (attrNamespaceURI) {
-                attrName = attr.localName || attrName;
-
-                if (!toNode.hasAttributeNS(attrNamespaceURI, attrName)) {
-                    fromNode.removeAttributeNS(attrNamespaceURI, attrName);
-                }
-            } else {
-                if (!toNode.hasAttribute(attrName)) {
-                    fromNode.removeAttribute(attrName);
-                }
-            }
-        }
-    }
-}
 
 var range; // Create a range object for efficently rendering strings to elements.
 var NS_XHTML = 'http://www.w3.org/1999/xhtml';
 
 var doc = typeof document === 'undefined' ? undefined : document;
 
-/**
- * This is about the same
- * var html = new DOMParser().parseFromString(str, 'text/html');
- * return html.body.firstChild;
- *
- * @method toElement
- * @param {String} str
- */
+var testEl = doc ?
+    doc.body || doc.createElement('div') :
+    {};
+
+// Fixes <https://github.com/patrick-steele-idem/morphdom/issues/32>
+// (IE7+ support) <=IE7 does not support el.hasAttribute(name)
+var actualHasAttributeNS;
+
+if (testEl.hasAttributeNS) {
+    actualHasAttributeNS = function(el, namespaceURI, name) {
+        return el.hasAttributeNS(namespaceURI, name);
+    };
+} else if (testEl.hasAttribute) {
+    actualHasAttributeNS = function(el, namespaceURI, name) {
+        return el.hasAttribute(name);
+    };
+} else {
+    actualHasAttributeNS = function(el, namespaceURI, name) {
+        return el.getAttributeNode(namespaceURI, name) != null;
+    };
+}
+
+var hasAttributeNS = actualHasAttributeNS;
+
+
 function toElement(str) {
     if (!range && doc.createRange) {
         range = doc.createRange();
+        range.selectNode(doc.body);
     }
 
     var fragment;
@@ -26129,40 +25910,79 @@ function moveChildren(fromEl, toEl) {
     return toEl;
 }
 
+function morphAttrs(fromNode, toNode) {
+    var attrs = toNode.attributes;
+    var i;
+    var attr;
+    var attrName;
+    var attrNamespaceURI;
+    var attrValue;
+    var fromValue;
+
+    for (i = attrs.length - 1; i >= 0; --i) {
+        attr = attrs[i];
+        attrName = attr.name;
+        attrNamespaceURI = attr.namespaceURI;
+        attrValue = attr.value;
+
+        if (attrNamespaceURI) {
+            attrName = attr.localName || attrName;
+            fromValue = fromNode.getAttributeNS(attrNamespaceURI, attrName);
+
+            if (fromValue !== attrValue) {
+                fromNode.setAttributeNS(attrNamespaceURI, attrName, attrValue);
+            }
+        } else {
+            fromValue = fromNode.getAttribute(attrName);
+
+            if (fromValue !== attrValue) {
+                fromNode.setAttribute(attrName, attrValue);
+            }
+        }
+    }
+
+    // Remove any extra attributes found on the original DOM element that
+    // weren't found on the target element.
+    attrs = fromNode.attributes;
+
+    for (i = attrs.length - 1; i >= 0; --i) {
+        attr = attrs[i];
+        if (attr.specified !== false) {
+            attrName = attr.name;
+            attrNamespaceURI = attr.namespaceURI;
+
+            if (attrNamespaceURI) {
+                attrName = attr.localName || attrName;
+
+                if (!hasAttributeNS(toNode, attrNamespaceURI, attrName)) {
+                    fromNode.removeAttributeNS(attrNamespaceURI, attrName);
+                }
+            } else {
+                if (!hasAttributeNS(toNode, null, attrName)) {
+                    fromNode.removeAttribute(attrName);
+                }
+            }
+        }
+    }
+}
+
 function syncBooleanAttrProp(fromEl, toEl, name) {
     if (fromEl[name] !== toEl[name]) {
         fromEl[name] = toEl[name];
         if (fromEl[name]) {
             fromEl.setAttribute(name, '');
         } else {
-            fromEl.removeAttribute(name);
+            fromEl.removeAttribute(name, '');
         }
     }
 }
 
 var specialElHandlers = {
+    /**
+     * Needed for IE. Apparently IE doesn't think that "selected" is an
+     * attribute when reading over the attributes using selectEl.attributes
+     */
     OPTION: function(fromEl, toEl) {
-        var parentNode = fromEl.parentNode;
-        if (parentNode) {
-            var parentName = parentNode.nodeName.toUpperCase();
-            if (parentName === 'OPTGROUP') {
-                parentNode = parentNode.parentNode;
-                parentName = parentNode && parentNode.nodeName.toUpperCase();
-            }
-            if (parentName === 'SELECT' && !parentNode.hasAttribute('multiple')) {
-                if (fromEl.hasAttribute('selected') && !toEl.selected) {
-                    // Workaround for MS Edge bug where the 'selected' attribute can only be
-                    // removed if set to a non-empty value:
-                    // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/12087679/
-                    fromEl.setAttribute('selected', 'selected');
-                    fromEl.removeAttribute('selected');
-                }
-                // We have to reset select element's selectedIndex to -1, otherwise setting
-                // fromEl.selected using the syncBooleanAttrProp below has no effect.
-                // The correct selectedIndex will be set in the SELECT special handler below.
-                parentNode.selectedIndex = -1;
-            }
-        }
         syncBooleanAttrProp(fromEl, toEl, 'selected');
     },
     /**
@@ -26179,7 +25999,7 @@ var specialElHandlers = {
             fromEl.value = toEl.value;
         }
 
-        if (!toEl.hasAttribute('value')) {
+        if (!hasAttributeNS(toEl, null, 'value')) {
             fromEl.removeAttribute('value');
         }
     },
@@ -26204,38 +26024,23 @@ var specialElHandlers = {
         }
     },
     SELECT: function(fromEl, toEl) {
-        if (!toEl.hasAttribute('multiple')) {
+        if (!hasAttributeNS(toEl, null, 'multiple')) {
             var selectedIndex = -1;
             var i = 0;
-            // We have to loop through children of fromEl, not toEl since nodes can be moved
-            // from toEl to fromEl directly when morphing.
-            // At the time this special handler is invoked, all children have already been morphed
-            // and appended to / removed from fromEl, so using fromEl here is safe and correct.
-            var curChild = fromEl.firstChild;
-            var optgroup;
-            var nodeName;
+            var curChild = toEl.firstChild;
             while(curChild) {
-                nodeName = curChild.nodeName && curChild.nodeName.toUpperCase();
-                if (nodeName === 'OPTGROUP') {
-                    optgroup = curChild;
-                    curChild = optgroup.firstChild;
-                } else {
-                    if (nodeName === 'OPTION') {
-                        if (curChild.hasAttribute('selected')) {
-                            selectedIndex = i;
-                            break;
-                        }
-                        i++;
+                var nodeName = curChild.nodeName;
+                if (nodeName && nodeName.toUpperCase() === 'OPTION') {
+                    if (hasAttributeNS(curChild, null, 'selected')) {
+                        selectedIndex = i;
+                        break;
                     }
-                    curChild = curChild.nextSibling;
-                    if (!curChild && optgroup) {
-                        curChild = optgroup.nextSibling;
-                        optgroup = null;
-                    }
+                    i++;
                 }
+                curChild = curChild.nextSibling;
             }
 
-            fromEl.selectedIndex = selectedIndex;
+            fromEl.selectedIndex = i;
         }
     }
 };
@@ -26395,7 +26200,7 @@ function morphdomFactory(morphAttrs) {
                     var unmatchedFromEl = fromNodesLookup[key];
                     if (unmatchedFromEl && compareNodeNames(curChild, unmatchedFromEl)) {
                         curChild.parentNode.replaceChild(unmatchedFromEl, curChild);
-                        morphChildren(unmatchedFromEl, curChild);
+                        morphEl(unmatchedFromEl, curChild);
                     }
                 }
 
@@ -26404,12 +26209,12 @@ function morphdomFactory(morphAttrs) {
             }
         }
 
-        function morphChildren(fromEl, toEl, childrenOnly) {
+        function morphEl(fromEl, toEl, childrenOnly) {
             var toElKey = getNodeKey(toEl);
             var curFromNodeKey;
 
             if (toElKey) {
-                // If an element with an ID is being morphed then it will be in the final
+                // If an element with an ID is being morphed then it is will be in the final
                 // DOM so clear it out of the saved elements collection
                 delete fromNodesLookup[toElKey];
             }
@@ -26419,14 +26224,11 @@ function morphdomFactory(morphAttrs) {
             }
 
             if (!childrenOnly) {
-                // optional
                 if (onBeforeElUpdated(fromEl, toEl) === false) {
                     return;
                 }
 
-                // update attributes on original DOM element first
                 morphAttrs(fromEl, toEl);
-                // optional
                 onElUpdated(fromEl);
 
                 if (onBeforeElChildrenUpdated(fromEl, toEl) === false) {
@@ -26443,12 +26245,10 @@ function morphdomFactory(morphAttrs) {
                 var toNextSibling;
                 var matchingFromEl;
 
-                // walk the children
                 outer: while (curToNodeChild) {
                     toNextSibling = curToNodeChild.nextSibling;
                     curToNodeKey = getNodeKey(curToNodeChild);
 
-                    // walk the fromNode children all the way through
                     while (curFromNodeChild) {
                         fromNextSibling = curFromNodeChild.nextSibling;
 
@@ -26476,7 +26276,7 @@ function morphdomFactory(morphAttrs) {
                                         // let's check our lookup to see if there is a matching element in the original
                                         // DOM tree
                                         if ((matchingFromEl = fromNodesLookup[curToNodeKey])) {
-                                            if (fromNextSibling === matchingFromEl) {
+                                            if (curFromNodeChild.nextSibling === matchingFromEl) {
                                                 // Special case for single element removals. To avoid removing the original
                                                 // DOM node out of the tree (since that can break CSS transitions, etc.),
                                                 // we will instead discard the current node and wait until the next
@@ -26485,7 +26285,7 @@ function morphdomFactory(morphAttrs) {
                                                 isCompatible = false;
                                             } else {
                                                 // We found a matching keyed element somewhere in the original DOM tree.
-                                                // Let's move the original DOM node into the current position and morph
+                                                // Let's moving the original DOM node into the current position and morph
                                                 // it.
 
                                                 // NOTE: We use insertBefore instead of replaceChild because we want to go through
@@ -26493,7 +26293,7 @@ function morphdomFactory(morphAttrs) {
                                                 // all lifecycle hooks are correctly invoked
                                                 fromEl.insertBefore(matchingFromEl, curFromNodeChild);
 
-                                                // fromNextSibling = curFromNodeChild.nextSibling;
+                                                fromNextSibling = curFromNodeChild.nextSibling;
 
                                                 if (curFromNodeKey) {
                                                     // Since the node is keyed it might be matched up later so we defer
@@ -26523,8 +26323,7 @@ function morphdomFactory(morphAttrs) {
                                     // We found compatible DOM elements so transform
                                     // the current "from" node to match the current
                                     // target DOM node.
-                                    // MORPH
-                                    morphChildren(curFromNodeChild, curToNodeChild);
+                                    morphEl(curFromNodeChild, curToNodeChild);
                                 }
 
                             } else if (curFromNodeType === TEXT_NODE || curFromNodeType == COMMENT_NODE) {
@@ -26563,7 +26362,7 @@ function morphdomFactory(morphAttrs) {
                         }
 
                         curFromNodeChild = fromNextSibling;
-                    } // END: while(curFromNodeChild) {}
+                    }
 
                     // If we got this far then we did not find a candidate match for
                     // our "to node" and we exhausted all of the children "from"
@@ -26571,8 +26370,7 @@ function morphdomFactory(morphAttrs) {
                     // to the end
                     if (curToNodeKey && (matchingFromEl = fromNodesLookup[curToNodeKey]) && compareNodeNames(matchingFromEl, curToNodeChild)) {
                         fromEl.appendChild(matchingFromEl);
-                        // MORPH
-                        morphChildren(matchingFromEl, curToNodeChild);
+                        morphEl(matchingFromEl, curToNodeChild);
                     } else {
                         var onBeforeNodeAddedResult = onBeforeNodeAdded(curToNodeChild);
                         if (onBeforeNodeAddedResult !== false) {
@@ -26614,7 +26412,7 @@ function morphdomFactory(morphAttrs) {
             if (specialElHandler) {
                 specialElHandler(fromEl, toEl);
             }
-        } // END: morphChildren(...)
+        } // END: morphEl(...)
 
         var morphedNode = fromNode;
         var morphedNodeType = morphedNode.nodeType;
@@ -26652,7 +26450,7 @@ function morphdomFactory(morphAttrs) {
             // toss out the "from node" and use the "to node"
             onNodeDiscarded(fromNode);
         } else {
-            morphChildren(morphedNode, toNode, childrenOnly);
+            morphEl(morphedNode, toNode, childrenOnly);
 
             // We now need to loop over any keyed nodes that might need to be
             // removed. We only do the removal if we know that the keyed node
@@ -26687,7 +26485,7 @@ function morphdomFactory(morphAttrs) {
 
 var morphdom = morphdomFactory(morphAttrs);
 
-/* harmony default export */ __webpack_exports__["default"] = (morphdom);
+module.exports = morphdom;
 
 
 /***/ }),
@@ -26736,7 +26534,7 @@ module.exports = [
 /* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global, module) {var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.9.1
+/* WEBPACK VAR INJECTION */(function(global, module) {var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.9.0
 //     http://underscorejs.org
 //     (c) 2009-2018 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Underscore may be freely distributed under the MIT license.
@@ -26798,7 +26596,7 @@ module.exports = [
   }
 
   // Current version.
-  _.VERSION = '1.9.1';
+  _.VERSION = '1.9.0';
 
   // Internal function that returns an efficient (for current engines) version
   // of the passed-in callback, to be repeatedly applied in other Underscore
@@ -26885,10 +26683,6 @@ module.exports = [
       return obj == null ? void 0 : obj[key];
     };
   };
-
-  var has = function(obj, path) {
-    return obj != null && hasOwnProperty.call(obj, path);
-  }
 
   var deepGet = function(obj, path) {
     var length = path.length;
@@ -27187,7 +26981,7 @@ module.exports = [
   // Groups the object's values by a criterion. Pass either a string attribute
   // to group by, or a function that returns the criterion.
   _.groupBy = group(function(result, value, key) {
-    if (has(result, key)) result[key].push(value); else result[key] = [value];
+    if (_.has(result, key)) result[key].push(value); else result[key] = [value];
   });
 
   // Indexes the object's values by a criterion, similar to `groupBy`, but for
@@ -27200,7 +26994,7 @@ module.exports = [
   // either a string attribute to count by, or a function that returns the
   // criterion.
   _.countBy = group(function(result, value, key) {
-    if (has(result, key)) result[key]++; else result[key] = 1;
+    if (_.has(result, key)) result[key]++; else result[key] = 1;
   });
 
   var reStrSymbol = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
@@ -27235,7 +27029,7 @@ module.exports = [
   // values in the array. Aliased as `head` and `take`. The **guard** check
   // allows it to work with `_.map`.
   _.first = _.head = _.take = function(array, n, guard) {
-    if (array == null || array.length < 1) return n == null ? void 0 : [];
+    if (array == null || array.length < 1) return void 0;
     if (n == null || guard) return array[0];
     return _.initial(array, array.length - n);
   };
@@ -27250,7 +27044,7 @@ module.exports = [
   // Get the last element of an array. Passing **n** will return the last N
   // values in the array.
   _.last = function(array, n, guard) {
-    if (array == null || array.length < 1) return n == null ? void 0 : [];
+    if (array == null || array.length < 1) return void 0;
     if (n == null || guard) return array[array.length - 1];
     return _.rest(array, Math.max(0, array.length - n));
   };
@@ -27553,7 +27347,7 @@ module.exports = [
     var memoize = function(key) {
       var cache = memoize.cache;
       var address = '' + (hasher ? hasher.apply(this, arguments) : key);
-      if (!has(cache, address)) cache[address] = func.apply(this, arguments);
+      if (!_.has(cache, address)) cache[address] = func.apply(this, arguments);
       return cache[address];
     };
     memoize.cache = {};
@@ -27720,7 +27514,7 @@ module.exports = [
 
     // Constructor is a special case.
     var prop = 'constructor';
-    if (has(obj, prop) && !_.contains(keys, prop)) keys.push(prop);
+    if (_.has(obj, prop) && !_.contains(keys, prop)) keys.push(prop);
 
     while (nonEnumIdx--) {
       prop = nonEnumerableProps[nonEnumIdx];
@@ -27736,7 +27530,7 @@ module.exports = [
     if (!_.isObject(obj)) return [];
     if (nativeKeys) return nativeKeys(obj);
     var keys = [];
-    for (var key in obj) if (has(obj, key)) keys.push(key);
+    for (var key in obj) if (_.has(obj, key)) keys.push(key);
     // Ahem, IE < 9.
     if (hasEnumBug) collectNonEnumProps(obj, keys);
     return keys;
@@ -28021,7 +27815,7 @@ module.exports = [
       while (length--) {
         // Deep compare each member
         key = keys[length];
-        if (!(has(b, key) && eq(a[key], b[key], aStack, bStack))) return false;
+        if (!(_.has(b, key) && eq(a[key], b[key], aStack, bStack))) return false;
       }
     }
     // Remove the first object from the stack of traversed objects.
@@ -28071,7 +27865,7 @@ module.exports = [
   // there isn't any inspectable "Arguments" type.
   if (!_.isArguments(arguments)) {
     _.isArguments = function(obj) {
-      return has(obj, 'callee');
+      return _.has(obj, 'callee');
     };
   }
 
@@ -28113,7 +27907,7 @@ module.exports = [
   // on itself (in other words, not on a prototype).
   _.has = function(obj, path) {
     if (!_.isArray(path)) {
-      return has(obj, path);
+      return obj != null && hasOwnProperty.call(obj, path);
     }
     var length = path.length;
     for (var i = 0; i < length; i++) {
@@ -38837,10 +38631,6 @@ const GetLineOptions = (type=LINE_TYPES.INACTIVE) => {
   let color = type;
   return {width, color}
 }
-//
-// const ACTIVE_LINE_OPTIONS = { width: 15, color: 'yellow'};
-// const INACTIVE_LINE_OPTIONS = {width: 15, color: 'green'};
-// const SELECTED_LINE_OPTIONS = {width: 15, color: 'red'};
 
 class SvgControls {
   constructor(element, svgDOM) {
@@ -38947,7 +38737,6 @@ class SvgControls {
 
     ray = Ray(x1,y1,x2,y2);
     collisions = this.castRay(ray, fluxel);
-
     let closest = _.sortBy(collisions, "distance")[0];
     return closest;
   }
@@ -38962,8 +38751,8 @@ class SvgControls {
     if (e.code == "ArrowLeft") closest = this.getClosestCollision(fluxel, "L");
     if (e.code == "ArrowRight") closest = this.getClosestCollision(fluxel, "R");
 
-    fluxel.active = false;
     if (closest.distance > this.neighbourDistance) return;
+    fluxel.active = false;
     if (this.fluxelsInverted != true) {
       closest.fluxel.selected = true;
       closest.fluxel.active = true;
@@ -38984,7 +38773,6 @@ class SvgControls {
       fluxel.active = true;
       closest.fluxel.selected = true;
       closest.fluxel.active = false;
-
       // Turn off all after given duration
       setTimeout(() => {
         let selected = _.find(this.fluxels, "selected");
@@ -41778,13 +41566,13 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;!function(n,t)
 
 var __WEBPACK_AMD_DEFINE_RESULT__;/*!
 * svg.js - A lightweight library for manipulating and animating SVG.
-* @version 2.7.1
+* @version 2.6.4
 * https://svgdotjs.github.io/
 *
 * @copyright Wout Fierens <wout@mick-wout.com>
 * @license MIT
 *
-* BUILT: Fri Nov 30 2018 10:01:55 GMT+0100 (GMT+01:00)
+* BUILT: Wed Feb 07 2018 22:59:25 GMT+0100 (Mitteleuropäische Zeit)
 */;
 (function(root, factory) {
   /* istanbul ignore next */
@@ -41800,12 +41588,8 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*!
   }
 }(typeof window !== "undefined" ? window : this, function(window, document) {
 
-// Find global reference - uses 'this' by default when available,
-// falls back to 'window' otherwise (for bundlers like Webpack)
-var globalRef = (typeof this !== "undefined") ? this : window;
-
 // The main wrapping element
-var SVG = globalRef.SVG = function(element) {
+var SVG = this.SVG = function(element) {
   if (SVG.supported) {
     element = new SVG.Doc(element)
 
@@ -41941,7 +41725,7 @@ SVG.prepare = function() {
   // Create parser object
   SVG.parser = {
     body: body || document.documentElement
-  , draw: draw.style('opacity:0;position:absolute;left:-100%;top:-100%;overflow:hidden').attr('focusable', 'false').node
+  , draw: draw.style('opacity:0;position:absolute;left:-100%;top:-100%;overflow:hidden').node
   , poly: draw.polyline().node
   , path: draw.path().node
   , native: SVG.create('svg')
@@ -42339,11 +42123,7 @@ SVG.extend(SVG.PointArray, {
     if (Array.isArray(array)) {
       // and it is not flat, there is no need to parse it
       if(Array.isArray(array[0])) {
-        // make sure to use a clone
-        return array.map(function (el) { return el.slice() })
-      } else if (array[0].x != null){
-        // allow point objects to be passed
-        return array.map(function (el) { return [el.x, el.y] })
+        return array
       }
     } else { // Else, it is considered as a string
       // parse points
@@ -42811,7 +42591,6 @@ SVG.Element = SVG.invent({
     // make stroke value accessible dynamically
     this._stroke = SVG.defaults.attrs.stroke
     this._event = null
-    this._events = {}
 
     // initialize data object
     this.dom = {}
@@ -42820,7 +42599,6 @@ SVG.Element = SVG.invent({
     if (this.node = node) {
       this.type = node.nodeName
       this.node.instance = this
-      this._events = node._events || {}
 
       // store current attribute value
       this._stroke = node.getAttribute('stroke') || this._stroke
@@ -42870,7 +42648,7 @@ SVG.Element = SVG.invent({
         .height(new SVG.Number(p.height))
     }
     // Clone element
-  , clone: function(parent) {
+  , clone: function(parent, withData) {
       // write dom data to the dom so the clone can pickup the data
       this.writeDataToDom()
 
@@ -42986,7 +42764,7 @@ SVG.Element = SVG.invent({
       // loop trough ancestors if type is given
       while(parent && parent.node instanceof window.SVGElement){
         if(typeof type === 'string' ? parent.matches(type) : parent instanceof type) return parent
-        if(!parent.node.parentNode || parent.node.parentNode.nodeName == '#document' || parent.node.parentNode.nodeName == '#document-fragment') return null // #759, #720
+        if(parent.node.parentNode.nodeName == '#document') return null // #720
         parent = SVG.adopt(parent.node.parentNode)
       }
     }
@@ -43023,7 +42801,7 @@ SVG.Element = SVG.invent({
       // act as a setter if svg is given
       if (svg && this instanceof SVG.Parent) {
         // dump raw svg
-        well.innerHTML = '<svg>' + svg.replace(/\n/, '').replace(/<([\w:-]+)([^<]+?)\/>/g, '<$1$2></$1>') + '</svg>'
+        well.innerHTML = '<svg>' + svg.replace(/\n/, '').replace(/<(\w+)([^<]+?)\/>/g, '<$1$2></$1>') + '</svg>'
 
         // transplant nodes
         for (var i = 0, il = well.firstChild.childNodes.length; i < il; i++)
@@ -43828,13 +43606,8 @@ SVG.MorphObj = SVG.invent({
   create: function(from, to){
     // prepare color for morphing
     if(SVG.Color.isColor(to)) return new SVG.Color(from).morph(to)
-    // check if we have a list of values
-    if(SVG.regex.delimiter.test(from)) {
-      // prepare path for morphing
-      if(SVG.regex.pathLetters.test(from)) return new SVG.PathArray(from).morph(to)
-      // prepare value list for morphing
-      else return new SVG.Array(from).morph(to)
-    }
+    // prepare value list for morphing
+    if(SVG.regex.delimiter.test(from)) return new SVG.Array(from).morph(to)
     // prepare number for morphing
     if(SVG.regex.numberAndUnit.test(to)) return new SVG.Number(from).morph(to)
 
@@ -44334,11 +44107,7 @@ SVG.Matrix = SVG.invent({
     }
     // Convert matrix to string
   , toString: function() {
-      // Construct the matrix directly, avoid values that are too small
-      return 'matrix(' + float32String(this.a) + ',' + float32String(this.b)
-        + ',' + float32String(this.c) + ',' + float32String(this.d)
-        + ',' + float32String(this.e) + ',' + float32String(this.f)
-        + ')'
+      return 'matrix(' + this.a + ',' + this.b + ',' + this.c + ',' + this.d + ',' + this.e + ',' + this.f + ')'
     }
   }
 
@@ -45181,142 +44950,146 @@ SVG.ViewBox = SVG.invent({
 
 })
 // Add events to elements
+;[  'click'
+  , 'dblclick'
+  , 'mousedown'
+  , 'mouseup'
+  , 'mouseover'
+  , 'mouseout'
+  , 'mousemove'
+  // , 'mouseenter' -> not supported by IE
+  // , 'mouseleave' -> not supported by IE
+  , 'touchstart'
+  , 'touchmove'
+  , 'touchleave'
+  , 'touchend'
+  , 'touchcancel' ].forEach(function(event) {
 
-;[ 'click',
-  'dblclick',
-  'mousedown',
-  'mouseup',
-  'mouseover',
-  'mouseout',
-  'mousemove',
-  'mouseenter',
-  'mouseleave',
-  'touchstart',
-  'touchmove',
-  'touchleave',
-  'touchend',
-  'touchcancel' ].forEach(function (event) {
-    // add event to SVG.Element
-    SVG.Element.prototype[event] = function (f) {
-      // bind event to element rather than element node
-      if (f == null) {
-        SVG.off(this, event)
-      } else {
-        SVG.on(this, event, f)
-      }
-      return this
-    }
-  })
+  // add event to SVG.Element
+  SVG.Element.prototype[event] = function(f) {
+    // bind event to element rather than element node
+    SVG.on(this.node, event, f)
+    return this
+  }
+})
 
+// Initialize listeners stack
+SVG.listeners = []
+SVG.handlerMap = []
 SVG.listenerId = 0
 
 // Add event binder in the SVG namespace
-SVG.on = function (node, events, listener, binding, options) {
-  var l = listener.bind(binding || node)
-  var n = node instanceof SVG.Element ? node.node : node
+SVG.on = function(node, event, listener, binding, options) {
+  // create listener, get object-index
+  var l     = listener.bind(binding || node.instance || node)
+    , index = (SVG.handlerMap.indexOf(node) + 1 || SVG.handlerMap.push(node)) - 1
+    , ev    = event.split('.')[0]
+    , ns    = event.split('.')[1] || '*'
 
-  // ensure instance object for nodes which are not adopted
-  n.instance = n.instance || {_events: {}}
 
-  var bag = n.instance._events
+  // ensure valid object
+  SVG.listeners[index]         = SVG.listeners[index]         || {}
+  SVG.listeners[index][ev]     = SVG.listeners[index][ev]     || {}
+  SVG.listeners[index][ev][ns] = SVG.listeners[index][ev][ns] || {}
 
-  // add id to listener
-  if (!listener._svgjsListenerId) { listener._svgjsListenerId = ++SVG.listenerId }
+  if(!listener._svgjsListenerId)
+    listener._svgjsListenerId = ++SVG.listenerId
 
-  events.split(SVG.regex.delimiter).forEach(function (event) {
-    var ev = event.split('.')[0]
-    var ns = event.split('.')[1] || '*'
+  // reference listener
+  SVG.listeners[index][ev][ns][listener._svgjsListenerId] = l
 
-    // ensure valid object
-    bag[ev] = bag[ev] || {}
-    bag[ev][ns] = bag[ev][ns] || {}
-
-    // reference listener
-    bag[ev][ns][listener._svgjsListenerId] = l
-
-    // add listener
-    n.addEventListener(ev, l, options || false)
-  })
+  // add listener
+  node.addEventListener(ev, l, options || false)
 }
 
 // Add event unbinder in the SVG namespace
-SVG.off = function (node, events, listener, options) {
-  var n = node instanceof SVG.Element ? node.node : node
-  if (!n.instance) return
+SVG.off = function(node, event, listener) {
+  var index = SVG.handlerMap.indexOf(node)
+    , ev    = event && event.split('.')[0]
+    , ns    = event && event.split('.')[1]
+    , namespace = ''
 
-  // listener can be a function or a number
-  if (typeof listener === 'function') {
-    listener = listener._svgjsListenerId
-    if (!listener) return
-  }
+  if(index == -1) return
 
-  var bag = n.instance._events
+  if (listener) {
+    if(typeof listener == 'function') listener = listener._svgjsListenerId
+    if(!listener) return
 
-  ;(events || '').split(SVG.regex.delimiter).forEach(function (event) {
-    var ev = event && event.split('.')[0]
-    var ns = event && event.split('.')[1]
-    var namespace, l
+    // remove listener reference
+    if (SVG.listeners[index][ev] && SVG.listeners[index][ev][ns || '*']) {
+      // remove listener
+      node.removeEventListener(ev, SVG.listeners[index][ev][ns || '*'][listener], false)
 
-    if (listener) {
-      // remove listener reference
-      if (bag[ev] && bag[ev][ns || '*']) {
-        // removeListener
-        n.removeEventListener(ev, bag[ev][ns || '*'][listener], options || false)
-
-        delete bag[ev][ns || '*'][listener]
-      }
-    } else if (ev && ns) {
-      // remove all listeners for a namespaced event
-      if (bag[ev] && bag[ev][ns]) {
-        for (l in bag[ev][ns]) { SVG.off(n, [ev, ns].join('.'), l) }
-
-        delete bag[ev][ns]
-      }
-    } else if (ns) {
-      // remove all listeners for a specific namespace
-      for (event in bag) {
-        for (namespace in bag[event]) {
-          if (ns === namespace) { SVG.off(n, [event, ns].join('.')) }
-        }
-      }
-    } else if (ev) {
-      // remove all listeners for the event
-      if (bag[ev]) {
-        for (namespace in bag[ev]) { SVG.off(n, [ev, namespace].join('.')) }
-
-        delete bag[ev]
-      }
-    } else {
-      // remove all listeners on a given node
-      for (event in bag) { SVG.off(n, event) }
-
-      n.instance._events = {}
+      delete SVG.listeners[index][ev][ns || '*'][listener]
     }
-  })
+
+  } else if (ns && ev) {
+    // remove all listeners for a namespaced event
+    if (SVG.listeners[index][ev] && SVG.listeners[index][ev][ns]) {
+      for (listener in SVG.listeners[index][ev][ns])
+        SVG.off(node, [ev, ns].join('.'), listener)
+
+      delete SVG.listeners[index][ev][ns]
+    }
+
+  } else if (ns){
+    // remove all listeners for a specific namespace
+    for(event in SVG.listeners[index]){
+        for(namespace in SVG.listeners[index][event]){
+            if(ns === namespace){
+                SVG.off(node, [event, ns].join('.'))
+            }
+        }
+    }
+
+  } else if (ev) {
+    // remove all listeners for the event
+    if (SVG.listeners[index][ev]) {
+      for (namespace in SVG.listeners[index][ev])
+        SVG.off(node, [ev, namespace].join('.'))
+
+      delete SVG.listeners[index][ev]
+    }
+
+  } else {
+    // remove all listeners on a given node
+    for (event in SVG.listeners[index])
+      SVG.off(node, event)
+
+    delete SVG.listeners[index]
+    delete SVG.handlerMap[index]
+
+  }
 }
 
+//
 SVG.extend(SVG.Element, {
   // Bind given event to listener
-  on: function (event, listener, binding, options) {
-    SVG.on(this, event, listener, binding, options)
+  on: function(event, listener, binding, options) {
+    SVG.on(this.node, event, listener, binding, options)
+
     return this
-  },
+  }
   // Unbind event from listener
-  off: function (event, listener) {
+, off: function(event, listener) {
     SVG.off(this.node, event, listener)
+
     return this
-  },
-  fire: function (event, data) {
+  }
+  // Fire given event
+, fire: function(event, data) {
+
     // Dispatch event
-    if (event instanceof window.Event) {
-      this.node.dispatchEvent(event)
-    } else {
-      this.node.dispatchEvent(event = new SVG.CustomEvent(event, {detail: data, cancelable: true}))
+    if(event instanceof window.Event){
+        this.node.dispatchEvent(event)
+    }else{
+        this.node.dispatchEvent(event = new window.CustomEvent(event, {detail:data, cancelable: true}))
     }
+
     this._event = event
     return this
-  },
-  event: function() {
+  }
+, event: function() {
     return this._event
   }
 })
@@ -45379,122 +45152,6 @@ SVG.G = SVG.invent({
       return this.put(new SVG.G)
     }
   }
-})
-
-SVG.Doc = SVG.invent({
-  // Initialize node
-  create: function(element) {
-    if (element) {
-      // ensure the presence of a dom element
-      element = typeof element == 'string' ?
-        document.getElementById(element) :
-        element
-
-      // If the target is an svg element, use that element as the main wrapper.
-      // This allows svg.js to work with svg documents as well.
-      if (element.nodeName == 'svg') {
-        this.constructor.call(this, element)
-      } else {
-        this.constructor.call(this, SVG.create('svg'))
-        element.appendChild(this.node)
-        this.size('100%', '100%')
-      }
-
-      // set svg element attributes and ensure defs node
-      this.namespace().defs()
-    }
-  }
-
-  // Inherit from
-, inherit: SVG.Container
-
-  // Add class methods
-, extend: {
-    // Add namespaces
-    namespace: function() {
-      return this
-        .attr({ xmlns: SVG.ns, version: '1.1' })
-        .attr('xmlns:xlink', SVG.xlink, SVG.xmlns)
-        .attr('xmlns:svgjs', SVG.svgjs, SVG.xmlns)
-    }
-    // Creates and returns defs element
-  , defs: function() {
-      if (!this._defs) {
-        var defs
-
-        // Find or create a defs element in this instance
-        if (defs = this.node.getElementsByTagName('defs')[0])
-          this._defs = SVG.adopt(defs)
-        else
-          this._defs = new SVG.Defs
-
-        // Make sure the defs node is at the end of the stack
-        this.node.appendChild(this._defs.node)
-      }
-
-      return this._defs
-    }
-    // custom parent method
-  , parent: function() {
-      if(!this.node.parentNode || this.node.parentNode.nodeName == '#document' || this.node.parentNode.nodeName == '#document-fragment') return null
-      return this.node.parentNode
-    }
-    // Fix for possible sub-pixel offset. See:
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=608812
-  , spof: function() {
-      var pos = this.node.getScreenCTM()
-
-      if (pos)
-        this
-          .style('left', (-pos.e % 1) + 'px')
-          .style('top',  (-pos.f % 1) + 'px')
-
-      return this
-    }
-
-      // Removes the doc from the DOM
-  , remove: function() {
-      if(this.parent()) {
-        this.parent().removeChild(this.node)
-      }
-
-      return this
-    }
-  , clear: function() {
-      // remove children
-      while(this.node.hasChildNodes())
-        this.node.removeChild(this.node.lastChild)
-
-      // remove defs reference
-      delete this._defs
-
-      // add back parser
-      if(!SVG.parser.draw.parentNode)
-        this.node.appendChild(SVG.parser.draw)
-
-      return this
-    }
-  , clone: function (parent) {
-      // write dom data to the dom so the clone can pickup the data
-      this.writeDataToDom()
-
-      // get reference to node
-      var node = this.node
-
-      // clone element and assign new id
-      var clone = assignNewId(node.cloneNode(true))
-
-      // insert the clone in the given parent or after myself
-      if(parent) {
-        (parent.node || parent).appendChild(clone.node)
-      } else {
-        node.parentNode.insertBefore(clone.node, node.nextSibling)
-      }
-
-      return clone
-    }
-  }
-
 })
 
 // ### This module adds backward / forward functionality to elements.
@@ -45605,7 +45262,7 @@ SVG.Mask = SVG.invent({
       this.targets = []
 
       // remove mask from parent
-      SVG.Element.prototype.remove.call(this)
+      this.parent().removeElement(this)
 
       return this
     }
@@ -45865,6 +45522,102 @@ SVG.extend(SVG.Defs, {
   }
 
 })
+SVG.Doc = SVG.invent({
+  // Initialize node
+  create: function(element) {
+    if (element) {
+      // ensure the presence of a dom element
+      element = typeof element == 'string' ?
+        document.getElementById(element) :
+        element
+
+      // If the target is an svg element, use that element as the main wrapper.
+      // This allows svg.js to work with svg documents as well.
+      if (element.nodeName == 'svg') {
+        this.constructor.call(this, element)
+      } else {
+        this.constructor.call(this, SVG.create('svg'))
+        element.appendChild(this.node)
+        this.size('100%', '100%')
+      }
+
+      // set svg element attributes and ensure defs node
+      this.namespace().defs()
+    }
+  }
+
+  // Inherit from
+, inherit: SVG.Container
+
+  // Add class methods
+, extend: {
+    // Add namespaces
+    namespace: function() {
+      return this
+        .attr({ xmlns: SVG.ns, version: '1.1' })
+        .attr('xmlns:xlink', SVG.xlink, SVG.xmlns)
+        .attr('xmlns:svgjs', SVG.svgjs, SVG.xmlns)
+    }
+    // Creates and returns defs element
+  , defs: function() {
+      if (!this._defs) {
+        var defs
+
+        // Find or create a defs element in this instance
+        if (defs = this.node.getElementsByTagName('defs')[0])
+          this._defs = SVG.adopt(defs)
+        else
+          this._defs = new SVG.Defs
+
+        // Make sure the defs node is at the end of the stack
+        this.node.appendChild(this._defs.node)
+      }
+
+      return this._defs
+    }
+    // custom parent method
+  , parent: function() {
+      return this.node.parentNode.nodeName == '#document' ? null : this.node.parentNode
+    }
+    // Fix for possible sub-pixel offset. See:
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=608812
+  , spof: function() {
+      var pos = this.node.getScreenCTM()
+
+      if (pos)
+        this
+          .style('left', (-pos.e % 1) + 'px')
+          .style('top',  (-pos.f % 1) + 'px')
+
+      return this
+    }
+
+      // Removes the doc from the DOM
+  , remove: function() {
+      if(this.parent()) {
+        this.parent().removeChild(this.node)
+      }
+
+      return this
+    }
+  , clear: function() {
+      // remove children
+      while(this.node.hasChildNodes())
+        this.node.removeChild(this.node.lastChild)
+
+      // remove defs reference
+      delete this._defs
+
+      // add back parser
+      if(!SVG.parser.draw.parentNode)
+        this.node.appendChild(SVG.parser.draw)
+
+      return this
+    }
+  }
+
+})
+
 SVG.Shape = SVG.invent({
   // Initialize node
   create: function(element) {
@@ -46374,7 +46127,7 @@ SVG.Text = SVG.invent({
       if (y == null)
         return typeof oy === 'number' ? oy - o : oy
 
-      return this.attr('y', typeof y.valueOf() === 'number' ? y + o : y)
+      return this.attr('y', typeof y === 'number' ? y + o : y)
     }
     // Move center over x-axis
   , cx: function(x) {
@@ -46918,11 +46671,8 @@ SVG.extend(SVG.Parent, SVG.Text, SVG.Tspan, SVG.FX, {
 SVG.Set = SVG.invent({
   // Initialize
   create: function(members) {
-    if (members instanceof SVG.Set) {
-      this.members = members.members.slice()
-    } else {
-      Array.isArray(members) ? this.members = members : this.clear()
-    }
+    // Set initial state
+    Array.isArray(members) ? this.members = members : this.clear()
   }
 
   // Add class methods
@@ -47063,6 +46813,8 @@ SVG.Set.inherit = function() {
     }
   })
 }
+
+
 
 
 SVG.extend(SVG.Element, {
@@ -47316,35 +47068,26 @@ function fullBox(b) {
 
 // Get id from reference string
 function idFromReference(url) {
-  var m = (url || '').toString().match(SVG.regex.reference)
+  var m = url.toString().match(SVG.regex.reference)
 
   if (m) return m[1]
 }
 
-// If values like 1e-88 are passed, this is not a valid 32 bit float,
-// but in those cases, we are so close to 0 that 0 works well!
-function float32String(v) {
-  return Math.abs(v) > 1e-37 ? v : 0
-}
-
 // Create matrix array for looping
 var abcdef = 'abcdef'.split('')
-
 // Add CustomEvent to IE9 and IE10
 if (typeof window.CustomEvent !== 'function') {
   // Code from: https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent
-  var CustomEventPoly = function(event, options) {
+  var CustomEvent = function(event, options) {
     options = options || { bubbles: false, cancelable: false, detail: undefined }
     var e = document.createEvent('CustomEvent')
     e.initCustomEvent(event, options.bubbles, options.cancelable, options.detail)
     return e
   }
 
-  CustomEventPoly.prototype = window.Event.prototype
+  CustomEvent.prototype = window.Event.prototype
 
-  SVG.CustomEvent = CustomEventPoly
-} else {
-  SVG.CustomEvent = window.CustomEvent
+  window.CustomEvent = CustomEvent
 }
 
 // requestAnimationFrame / cancelAnimationFrame Polyfill with fallback based on Paul Irish
