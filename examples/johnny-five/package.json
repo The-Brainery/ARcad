@@ -10,7 +10,7 @@
   },
   "install": "electron-rebuild",
   "devDependencies": {
-    "electron": "1"
+    "electron": "15"
   },
   "scripts": {
     "start": "./node_modules/.bin/electron ."
